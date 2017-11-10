@@ -50,11 +50,11 @@ var angleZZ = 0.0;
 
 // The scaling factors
 
-var sx = 0.5;
+var sx = 0.05;
 
-var sy = 0.5;
+var sy = 0.05;
 
-var sz = 0.5;
+var sz = 0.05;
 
 // GLOBAL Animation controls
 
@@ -503,11 +503,33 @@ function tick() {
 
 	requestAnimFrame(tick);
 
+	resizeCanvas(gl.canvas);
+	gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
+
 	drawScene();
 
-	animate();
+	//animate();
 }
 
+
+//----------------------------------------------------------------------------
+
+// Resize Canvas
+
+function resizeCanvas(canvas) {
+	// Lookup the size the browser is displaying the canvas.
+	var displayWidth  = canvas.clientWidth;
+	var displayHeight = canvas.clientHeight;
+
+	// Check if the canvas is not the same size.
+	if (canvas.width  != displayWidth ||
+	  canvas.height != displayHeight) {
+ 
+    // Make the canvas the same size
+    canvas.width  = displayWidth;
+    canvas.height = displayHeight;
+  }
+}
 
 //----------------------------------------------------------------------------
 //
@@ -582,7 +604,7 @@ function setEventListeners(){
 
 			angleXX = angleYY = angleZZ = 0.0;
 
-			sx = sy = sz = 0.5;
+			sx = sy = sz = 0.05;
 		};
 
 		// Entire file read as a string
@@ -633,122 +655,6 @@ function setEventListeners(){
 		}
 	});
 
-	// Button events
-
-	document.getElementById("XX-on-off-button").onclick = function(){
-
-		// Switching on / off
-
-		if( rotationXX_ON ) {
-
-			rotationXX_ON = 0;
-		}
-		else {
-
-			rotationXX_ON = 1;
-		}
-	};
-
-	document.getElementById("XX-direction-button").onclick = function(){
-
-		// Switching the direction
-
-		if( rotationXX_DIR == 1 ) {
-
-			rotationXX_DIR = -1;
-		}
-		else {
-
-			rotationXX_DIR = 1;
-		}
-	};
-
-	document.getElementById("XX-slower-button").onclick = function(){
-
-		rotationXX_SPEED *= 0.75;
-	};
-
-	document.getElementById("XX-faster-button").onclick = function(){
-
-		rotationXX_SPEED *= 1.25;
-	};
-
-	document.getElementById("YY-on-off-button").onclick = function(){
-
-		// Switching on / off
-
-		if( rotationYY_ON ) {
-
-			rotationYY_ON = 0;
-		}
-		else {
-
-			rotationYY_ON = 1;
-		}
-	};
-
-	document.getElementById("YY-direction-button").onclick = function(){
-
-		// Switching the direction
-
-		if( rotationYY_DIR == 1 ) {
-
-			rotationYY_DIR = -1;
-		}
-		else {
-
-			rotationYY_DIR = 1;
-		}
-	};
-
-	document.getElementById("YY-slower-button").onclick = function(){
-
-		rotationYY_SPEED *= 0.75;
-	};
-
-	document.getElementById("YY-faster-button").onclick = function(){
-
-		rotationYY_SPEED *= 1.25;
-	};
-
-	document.getElementById("ZZ-on-off-button").onclick = function(){
-
-		// Switching on / off
-
-		if( rotationZZ_ON ) {
-
-			rotationZZ_ON = 0;
-		}
-		else {
-
-			rotationZZ_ON = 1;
-		}
-	};
-
-	document.getElementById("ZZ-direction-button").onclick = function(){
-
-		// Switching the direction
-
-		if( rotationZZ_DIR == 1 ) {
-
-			rotationZZ_DIR = -1;
-		}
-		else {
-
-			rotationZZ_DIR = 1;
-		}
-	};
-
-	document.getElementById("ZZ-slower-button").onclick = function(){
-
-		rotationZZ_SPEED *= 0.75;
-	};
-
-	document.getElementById("ZZ-faster-button").onclick = function(){
-
-		rotationZZ_SPEED *= 1.25;
-	};
-
 	document.getElementById("reset-button").onclick = function(){
 
 		// The initial values
@@ -765,11 +671,11 @@ function setEventListeners(){
 
 		angleZZ = 0.0;
 
-		sx = 0.5;
+		sx = 0.05;
 
-		sy = 0.5;
+		sy = 0.05;
 
-		sz = 0.5;
+		sz = 0.05;
 
 		rotationXX_ON = 0;
 
@@ -789,6 +695,38 @@ function setEventListeners(){
 
 		rotationZZ_SPEED = 1;
 	};
+
+	document.addEventListener("keypress", function(event){
+				
+		var key = event.charCode; // ASCII
+
+		switch(key){
+			//Go up
+			case 87 : // W
+			case 119: // w
+				ty += 0.01;
+				drawScene();  	
+				break;
+			//Go left
+			case 65: // A
+			case 97: // a
+				tx -= 0.01;
+				drawScene();
+				break;
+			//Go down
+			case 83: // S
+			case 115: // s
+				ty -= 0.01;
+				drawScene();
+				break;
+			//Go right
+			case 68: // D
+			case 100: // d
+				tx += 0.01;
+				drawScene();
+				break;
+		}
+	});		
 }
 
 //----------------------------------------------------------------------------
