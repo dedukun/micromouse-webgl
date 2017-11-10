@@ -50,11 +50,11 @@ var angleZZ = 0.0;
 
 // The scaling factors
 
-var sx = 0.05;
+var sx = 1;
 
-var sy = 0.05;
+var sy = 1;
 
-var sz = 0.05;
+var sz = 1;
 
 // GLOBAL Animation controls
 
@@ -604,7 +604,7 @@ function setEventListeners(){
 
 			angleXX = angleYY = angleZZ = 0.0;
 
-			sx = sy = sz = 0.05;
+			sx = sy = sz = 1;
 		};
 
 		// Entire file read as a string
@@ -671,11 +671,11 @@ function setEventListeners(){
 
 		angleZZ = 0.0;
 
-		sx = 0.05;
+		sx = 1;
 
-		sy = 0.05;
+		sy = 1;
 
-		sz = 0.05;
+		sz = 1;
 
 		rotationXX_ON = 0;
 
