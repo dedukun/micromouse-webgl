@@ -122,11 +122,11 @@ var vertices = [
 
 		// FRONTAL TRIANGLE
 
-		-0.5, -0.5,  0.5,
+		-1.0, -1.0,  1.0,
 
-		 0.5, -0.5,  0.5,
+		 1.0, -1.0,  1.0,
 
-		 0.5,  0.5,  0.5,
+		 1.0,  1.0,  1.0,
 ];
 
 var normals = [
@@ -555,7 +555,6 @@ function handleKeys() {
 	if (currentlyPressedKeys[33]) {
 
 		// Page Up
-        console.log("Page UP");
 		sx *= 0.9;
 
 		sz = sy = sx;
