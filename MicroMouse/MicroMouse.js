@@ -506,6 +506,8 @@ function tick() {
 	resizeCanvas(gl.canvas);
 	gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
 
+    handleKeys();
+
 	drawScene();
 
 	//animate();
@@ -524,7 +526,7 @@ function resizeCanvas(canvas) {
 	// Check if the canvas is not the same size.
 	if (canvas.width  != displayWidth ||
 	  canvas.height != displayHeight) {
- 
+
     // Make the canvas the same size
     canvas.width  = displayWidth;
     canvas.height = displayHeight;
@@ -542,9 +544,116 @@ function outputInfos(){
 
 //----------------------------------------------------------------------------
 
-function setEventListeners(){
+// Handling keyboard events
 
-	// NEW --- File loading
+// Adapted from www.learningwebgl.com
+
+var currentlyPressedKeys = {};
+
+function handleKeys() {
+
+	if (currentlyPressedKeys[33]) {
+
+		// Page Up
+        console.log("Page UP");
+		sx *= 0.9;
+
+		sz = sy = sx;
+	}
+	if (currentlyPressedKeys[34]) {
+
+		// Page Down
+
+		sx *= 1.1;
+
+		sz = sy = sx;
+	}
+}
+
+//----------------------------------------------------------------------------
+
+// Handling mouse events
+
+// Adapted from www.learningwebgl.com
+
+
+var mouseDown = false;
+
+var lastMouseX = null;
+
+var lastMouseY = null;
+
+function handleMouseDown(event) {
+
+    mouseDown = true;
+
+    lastMouseX = event.clientX;
+
+    lastMouseY = event.clientY;
+}
+
+function handleMouseUp(event) {
+
+    mouseDown = false;
+}
+
+function handleMouseMove(event) {
+
+    if (!mouseDown) {
+
+      return;
+    }
+
+    // Rotation angles proportional to cursor displacement
+
+    var newX = event.clientX;
+
+    var newY = event.clientY;
+
+    var deltaX = newX - lastMouseX;
+
+    angleYY += radians( 10 * deltaX  )
+
+    var deltaY = newY - lastMouseY;
+
+    angleXX += radians( 10 * deltaY  )
+
+    lastMouseX = newX
+
+    lastMouseY = newY;
+  }
+
+//----------------------------------------------------------------------------
+
+function setEventListeners( canvas ){
+
+    // Mouse + Keyboard Events
+	// From learningwebgl.com
+
+    canvas.onmousedown = handleMouseDown;
+
+    document.onmouseup = handleMouseUp;
+
+    document.onmousemove = handleMouseMove;
+
+    // NEW ---Handling the keyboard
+
+	// From learningwebgl.com
+
+    function handleKeyDown(event) {
+
+        currentlyPressedKeys[event.keyCode] = true;
+    }
+
+    function handleKeyUp(event) {
+
+        currentlyPressedKeys[event.keyCode] = false;
+    }
+
+	document.onkeydown = handleKeyDown;
+
+    document.onkeyup = handleKeyUp;
+
 
 	// Adapted from:
 
@@ -697,7 +806,7 @@ function setEventListeners(){
 	};
 
 	document.addEventListener("keypress", function(event){
-				
+
 		var key = event.charCode; // ASCII
 
 		switch(key){
@@ -705,7 +814,7 @@ function setEventListeners(){
 			case 87 : // W
 			case 119: // w
 				ty += 0.01;
-				drawScene();  	
+				drawScene();
 				break;
 			//Go left
 			case 65: // A
@@ -726,7 +835,7 @@ function setEventListeners(){
 				drawScene();
 				break;
 		}
-	});		
+	});
 }
 
 //----------------------------------------------------------------------------
@@ -784,7 +893,7 @@ function runWebGL() {
 
 	shaderProgram = initShaders( gl );
 
-	setEventListeners();
+	setEventListeners( canvas );
 
 	initBuffers();
 
