@@ -223,6 +223,10 @@ The fragment shader is the same simple one.
 
 <script type="text/javascript" src="MicroMouse.js"></script>
 
+<!-- jQuery Import (Used to import files) -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 </head>
 
 <body onload="runWebGL();">
@@ -234,15 +238,6 @@ The fragment shader is the same simple one.
 		<canvas id="my-canvas" style="border:1px solid #000000;  width: auto; height: 80vh" width="350" height="350"></canvas>
 
 		<p id="fps"> fps: </p>
-
-		<p>Choose the <b>projection type</b>:
-
-        <select id="projection-selection">
-			<option value="0">Orthogonal Projection</option>
-			<option value="1">Perspective Projection</option>
-        </select>
-
-        </p>
 
         <p>Choose the <b>rendering mode</b>:
 
