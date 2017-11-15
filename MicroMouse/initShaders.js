@@ -65,17 +65,15 @@ function initShaders( gl ) {
 
 	gl.useProgram(shaderProgram);
 
-	// Shader input
+	// Coordinates
 
-	// Vertex Coordinates
-
-	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "vPosition");
+	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
 	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-	// Vertex Normals
+	// Colors
 
-	shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "vNormal");
-	gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+	shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+	gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
 	return shaderProgram;
 }

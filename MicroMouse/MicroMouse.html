@@ -34,16 +34,18 @@ The fragment shader is the same simple one.
 
 <script id="shader-vs" type="x-shader/x-vertex">
 
-    attribute vec3 vPosition;
+    attribute vec3 aVertexPosition;
+
+    attribute vec3 aVertexColor;
 
     uniform mat4 uMVMatrix;
 
     uniform mat4 uPMatrix;
 
-    varying vec4 fColor;
+    varying vec4 vertexColor;
 
     // For the Phong Illumination Model - NEW
-
+    /*
     attribute vec3 vNormal;
 
     uniform vec4 viewerPosition;
@@ -75,6 +77,7 @@ The fragment shader is the same simple one.
 	uniform vec3 k_specular;
 
     uniform float shininess;
+    */
 
     void main(void) {
 
@@ -86,13 +89,19 @@ The fragment shader is the same simple one.
 
 		// And multiplying by the Projection and the Model-View matrix
 
-        gl_Position = uPMatrix * uMVMatrix * vec4(vPosition, 1.0);
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
+        // Converting the RGB color value to RGBA
+
+        vertexColor = vec4(aVertexColor, 1.0);
+
+        /*
         // Phong Illumination Model
 
         // pos is vertex position after applying the global transformation
 
-        vec3 pos = (uMVMatrix * vec4(vPosition, 1.0)).xyz;
+        //vec3 pos = (uMVMatrix * vec4(vPosition, 1.0)).xyz;
+
 
 		// NEW - ITERATING THROUGH ALL LIGHT SOURCES
 
@@ -180,21 +189,21 @@ The fragment shader is the same simple one.
 
            fColor += diffuse + specular;
 	   }
+       */
 	}
-
 </script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
 
 	precision mediump float;
 
-	varying vec4 fColor;
+	varying vec4 vertexColor;
 
 	void main(void) {
 
 		// Using the passed vertex color
 
-		gl_FragColor = fColor;
+		gl_FragColor = vertexColor;
 	}
 
 </script>

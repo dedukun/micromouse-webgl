@@ -14,12 +14,19 @@
 var gl = null;
 
 var shaderProgram = null;
-var triangleVertexPositionBuffer = null;
-var triangleVertexNormalBuffer = null;
+
+// Buffers
+var cubeVertexPositionBuffer = null;
+var cubeVertexColorBuffer = null;
+var cubeVertexIndexBuffer = null;
 
 // The GLOBAL transformation parameters
+var globalAngleXX = 0.0;
 var globalAngleYY = 0.0;
 var globalTz = 0.0;
+var globalSz = 1;
+var globalSy = 1;
+var globalSx = 1;
 
 // The local transformation parameters
 
@@ -74,29 +81,126 @@ var kSpec = [ 0.7, 0.7, 0.7 ];
 // Phong coef.
 var nPhong = 100;
 
-// Initial model has just ONE TRIANGLE
-var models;
+// Dictionary with models
+var models = null;
+
 var vertices = [
+        -0.058333,  0.000000,  0.004167,
+         0.058333,  0.000000,  0.004167,
+         0.058333,  0.034722,  0.004167,
+        -0.058333,  0.034722,  0.004167,
 
-		// FRONTAL TRIANGLE
+         0.058333,  0.000000,  0.004167,
+         0.058333,  0.000000, -0.004167,
+         0.058333,  0.034722, -0.004167,
+         0.058333,  0.034722,  0.004167,
 
-		-1.0, -1.0,  1.0,
+        -0.058333,  0.000000, -0.004167,
+        -0.058333,  0.034722, -0.004167,
+         0.058333,  0.034722, -0.004167,
+         0.058333,  0.000000, -0.004167,
 
-		 1.0, -1.0,  1.0,
+        -0.058333,  0.000000, -0.004167,
+        -0.058333,  0.000000,  0.004167,
+        -0.058333,  0.034722,  0.004167,
+        -0.058333,  0.034722, -0.004167,
 
-		 1.0,  1.0,  1.0,
+        -0.058333,  0.034722, -0.004167,
+        -0.058333,  0.034722,  0.004167,
+         0.058333,  0.034722,  0.004167,
+         0.058333,  0.034722, -0.004167,
+
+        -0.058333,  0.000000,  0.004167,
+        -0.058333,  0.000000, -0.004167,
+         0.058333,  0.000000, -0.004167,
+         0.058333,  0.000000,  0.004167
 ];
 
-var normals = [
+// Vertex indices defining the triangles
 
-		// FRONTAL TRIANGLE
+var cubeVertexIndices = [
 
-		 0.0,  0.0,  1.0,
+            0, 1, 2,      0, 2, 3,    // Front face
 
-		 0.0,  0.0,  1.0,
+            4, 5, 6,      4, 6, 7,    // Back face
 
-		 0.0,  0.0,  1.0,
+            8, 9, 10,     8, 10, 11,  // Top face
+
+            12, 13, 14,   12, 14, 15, // Bottom face
+
+            16, 17, 18,   16, 18, 19, // Right face
+
+            20, 21, 22,   20, 22, 23  // Left face
 ];
+
+// And their colour
+
+var colors = [
+
+		 // FRONT FACE - RED
+
+		 1.00,  0.00,  0.00,
+
+		 1.00,  0.00,  0.00,
+
+		 1.00,  0.00,  0.00,
+
+		 1.00,  0.00,  0.00,
+
+		 // BACK FACE - BLACK
+
+		 0.00,  0.00,  0.00,
+
+		 0.00,  0.00,  0.00,
+
+		 0.00,  0.00,  0.00,
+
+		 0.00,  0.00,  0.00,
+
+		 // TOP FACE -
+
+		 1.00,  1.00,  0.00,
+
+		 1.00,  1.00,  0.00,
+
+		 1.00,  1.00,  0.00,
+
+		 1.00,  1.00,  0.00,
+
+
+		 // BOTTOM FACE
+
+		 0.00,  1.00,  1.00,
+
+		 0.00,  1.00,  1.00,
+
+		 0.00,  1.00,  1.00,
+
+		 0.00,  1.00,  1.00,
+
+
+		 // RIGHT FACE - BLUE
+
+		 0.00,  0.00,  1.00,
+
+		 0.00,  0.00,  1.00,
+
+		 0.00,  0.00,  1.00,
+
+		 0.00,  0.00,  1.00,
+
+
+		 // LEFT FACE - GREEN
+
+		 0.00,  1.00,  0.00,
+
+		 0.00,  1.00,  0.00,
+
+		 0.00,  1.00,  0.00,
+
+		 0.00,  1.00,  0.00,
+];
+
 
 
 //----------------------------------------------------------------------------
@@ -140,33 +244,34 @@ function countFrames() {
 //  Rendering
 //
 
-// Handling the Vertex Coordinates and the Vertex Normal Vectors
+// Handling the Vertex and the Color Buffers
 
-function initBuffers() {
+function initBuffers(model) {
 
-	// Vertex Coordinates
-	triangleVertexPositionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	triangleVertexPositionBuffer.itemSize = 3;
-	triangleVertexPositionBuffer.numItems = vertices.length / 3;
+	// Coordinates
 
-	// Associating to the vertex shader
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute,
-			triangleVertexPositionBuffer.itemSize,
-			gl.FLOAT, false, 0, 0);
+	cubeVertexPositionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['vertices']), gl.STATIC_DRAW);
+	cubeVertexPositionBuffer.itemSize = 3;
+	cubeVertexPositionBuffer.numItems = model['vertices'].length / 3;
+                                        // models['?']['vertices'].length
 
-	// Vertex Normal Vectors
-	triangleVertexNormalBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexNormalBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-	triangleVertexNormalBuffer.itemSize = 3;
-	triangleVertexNormalBuffer.numItems = normals.length / 3;
+	// Colors
 
-	// Associating to the vertex shader
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute,
-			triangleVertexNormalBuffer.itemSize,
-			gl.FLOAT, false, 0, 0);
+	cubeVertexColorBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+	cubeVertexColorBuffer.itemSize = 3;
+	cubeVertexColorBuffer.numItems = model['vertices'].length / 3;
+
+	// Vertex indices
+
+    cubeVertexIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model['faces']), gl.STATIC_DRAW);
+    cubeVertexIndexBuffer.itemSize = 1;
+    cubeVertexIndexBuffer.numItems = model['faces'].length;
 }
 
 //----------------------------------------------------------------------------
@@ -179,9 +284,8 @@ function drawModel( angleXX, angleYY, angleZZ,
 					mvMatrix,
 					primitiveType ) {
 
-	// The global model transformation is an input
-	// Concatenate with the particular model transformations
-    // Transformation order is important
+    // Pay attention to transformation order !!
+
 	mvMatrix = mult( mvMatrix, translationMatrix( tx, ty, tz ) );
 
 	mvMatrix = mult( mvMatrix, rotationZZMatrix( angleZZ ) );
@@ -193,62 +297,26 @@ function drawModel( angleXX, angleYY, angleZZ,
 	mvMatrix = mult( mvMatrix, scalingMatrix( sx, sy, sz ) );
 
 	// Passing the Model View Matrix to apply the current transformation
+
 	var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 
 	gl.uniformMatrix4fv(mvUniform, false, new Float32Array(flatten(mvMatrix)));
 
-	// Associating the data to the vertex shader
-	// This can be done in a better way !!
-	// Vertex Coordinates and Vertex Normal Vectors
+    // Passing the buffers
 
-	initBuffers();
+	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
 
-	// Material properties
-	gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_ambient"),
-		flatten(kAmbi) );
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_diffuse"),
-        flatten(kDiff) );
+	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
 
-    gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_specular"),
-        flatten(kSpec) );
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	gl.uniform1f( gl.getUniformLocation(shaderProgram, "shininess"),
-		nPhong );
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
 
-    // Light Sources
-	var numLights = 2;
+	// Drawing the triangles --- NEW --- DRAWING ELEMENTS
 
-	gl.uniform1i( gl.getUniformLocation(shaderProgram, "numLights"),
-		numLights );
-
-	//Light Sources
-	for(var i = 0; i < lightSources.length; i++ )
-	{
-		gl.uniform4fv( gl.getUniformLocation(shaderProgram, "allLights[" + String(i) + "].position"),
-			flatten(lightSources[i].getPosition()) );
-
-		gl.uniform3fv( gl.getUniformLocation(shaderProgram, "allLights[" + String(i) + "].intensities"),
-			flatten(lightSources[i].getIntensity()) );
-    }
-
-	// Drawing
-	// primitiveType allows drawing as filled triangles / wireframe / vertices
-
-	if( primitiveType == gl.LINE_LOOP ) {
-
-		// To simulate wireframe drawing!
-		// No faces are defined! There are no hidden lines!
-		// Taking the vertices 3 by 3 and drawing a LINE_LOOP
-
-		var i;
-		for( i = 0; i < triangleVertexPositionBuffer.numItems / 3; i++ ) {
-			gl.drawArrays( primitiveType, 3 * i, 3 );
-		}
-	}
-	else {
-		gl.drawArrays(primitiveType, 0, triangleVertexPositionBuffer.numItems);
-	}
+	gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 //----------------------------------------------------------------------------
@@ -261,16 +329,13 @@ function drawScene() {
 	var mvMatrix = mat4();
 
 	// Clearing the frame-buffer and the depth-buffer
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // HERE
 
 	// Computing the Projection Matrix
 	// A standard view volume.
 	// Viewer is at (0,0,0)
 	// Ensure that the model is "inside" the view volume
 	pMatrix = perspective( 45, 1, 0.05, 15 );
-
-	// Global transformation
-	globalTz = -2.5;
 
 	//The viewer is on (0,0,0)
 	pos_Viewer[0] = pos_Viewer[1] = pos_Viewer[2] = 0.0;
@@ -283,39 +348,33 @@ function drawScene() {
 	gl.uniformMatrix4fv(pUniform, false, new Float32Array(flatten(pMatrix)));
 
 	// Passing the viewer position to the vertex shader
-	gl.uniform4fv( gl.getUniformLocation(shaderProgram, "viewerPosition"),
-        flatten(pos_Viewer) );
+    gl.uniform4fv( gl.getUniformLocation(shaderProgram, "viewerPosition"), flatten(pos_Viewer) );
+
+	// Global transformation
+	globalTz = -2.5;
 
 	// GLOBAL TRANSFORMATION FOR THE WHOLE SCENE
-	mvMatrix = translationMatrix( 0, 0, globalTz );
+	mvMatrix = translationMatrix(0, 0, globalTz );
+	mvMatrix = mult( mvMatrix, rotationYYMatrix( globalAngleYY ) );
+	mvMatrix = mult( mvMatrix, rotationXXMatrix( globalAngleXX ) );
+	mvMatrix = mult( mvMatrix, scalingMatrix( globalSx, globalSy, globalSz ) );
 
 	// Updating the position of the light sources, if required
 
-	// for each light source
-	for(var i = 0; i < lightSources.length; i++ )
-	{
-		if( lightSources[i].isOff() ) {
+    // Drawing Objects
+    drawEmptyMap(mvMatrix);
+    drawMap(mvMatrix);
+    drawMouse(mvMatrix);
+    drawMarkers(mvMatrix);
 
-			continue;
-		}
+	// Counting the frames
+	countFrames();
+}
 
-		// Animating the light source, if defined
+function drawEmptyMap(mvMatrix){
 
-		var lightSourceMatrix = mat4();
-
-		// TODO COMPLETE THE CODE FOR THE OTHER ROTATION AXES
-
-		if( lightSources[i].isRotYYOn() )
-		{
-			lightSourceMatrix = mult(
-					lightSourceMatrix,
-					rotationYYMatrix( lightSources[i].getRotAngleYY() ) );
-		}
-
-		// Passing the Light Souree Matrix to apply
-		var lsmUniform = gl.getUniformLocation(shaderProgram, "allLights["+ String(i) + "].lightSourceMatrix");
-		gl.uniformMatrix4fv(lsmUniform, false, new Float32Array(flatten(lightSourceMatrix)));
-	}
+    // Drawing the floor
+    initBuffers(models['floor']);
 
 	// Instantianting the current model
 	drawModel( angleXX, angleYY, angleZZ,
@@ -324,9 +383,26 @@ function drawScene() {
 	           mvMatrix,
 	           primitiveType );
 
-	// Counting the frames
-	countFrames();
+
+    // Drawing all the posts
+    initBuffers(models['post']);
+
+    for(var xx = -8; xx <= 8; xx++)
+        for(var zz = -8; zz <= 8; zz++){
+            // Instantianting the current model
+            drawModel( angleXX, angleYY, angleZZ,
+                       sx, sy, sz,
+                       tx + (xx * 0.1245), ty, tz + (zz * 0.1245),
+                       mvMatrix,
+                       primitiveType );
+    }
 }
+
+function drawMap(mvMatrix){}
+
+function drawMouse(mvMatrix){}
+
+function drawMarkers(mvMatrix){}
 
 //----------------------------------------------------------------------------
 //
@@ -370,7 +446,7 @@ function animate() {
 	    }
 
 		// Rotating the light sources
-
+        /*
 		for(var i = 0; i < lightSources.length; i++ )
 	    {
 			if( lightSources[i].isRotYYOn() ) {
@@ -380,6 +456,7 @@ function animate() {
 				lightSources[i].setRotAngleYY( angle );
 			}
 		}
+        */
 }
 
 	lastTime = timeNow;
@@ -444,14 +521,14 @@ function handleKeys() {
 	// Page Up
 	if (currentlyPressedKeys[33]) {
 		//Zoom out
-		sx *= 0.9;
-		sz = sy = sx;
+		globalSx *= 0.9;
+		globalSz = globalSy = globalSx;
 	}
 	// Page Down
 	if (currentlyPressedKeys[34]) {
 		//Zoom in
-		sx *= 1.1;
-		sz = sy = sx;
+		globalSx *= 1.1;
+		globalSz = globalSy = globalSx;
 	}
 	// W or w
 	if (currentlyPressedKeys[87] || currentlyPressedKeys[119]) {
@@ -514,11 +591,11 @@ function handleMouseMove(event) {
 
     var deltaX = newX - lastMouseX;
 
-    angleYY += radians( 10 * deltaX  )
+    globalAngleYY += radians( 10 * deltaX  )
 
     var deltaY = newY - lastMouseY;
 
-    angleXX += radians( 10 * deltaY  )
+    globalAngleXX += radians( 10 * deltaY  )
 
     lastMouseX = newX
 
@@ -643,7 +720,7 @@ function loadMapData(){
 		computeVertexNormals( vertices, normals );
 
 		// To render the model just read
-		initBuffers();
+		//initBuffers();
 
 		// Reset the transformations
 		tx = ty = tz = 0.0;
@@ -709,11 +786,18 @@ function initWebGL( canvas ) {
 function runWebGL() {
 
 	var canvas = document.getElementById("my-canvas");
+
 	initWebGL( canvas );
+
 	shaderProgram = initShaders( gl );
-    models = getModels();
+
 	setEventListeners( canvas );
-	initBuffers();
+
+    models = getModels(); // Get models used
+
+	//initBuffers();
+
 	tick();		// Timer that controls the rendering / animation
+
 	outputInfos();
 }
