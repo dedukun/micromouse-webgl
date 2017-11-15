@@ -308,57 +308,66 @@ function drawEmptyMap(mvMatrix){
 	           mvMatrix,
 	           primitiveType );
 
+/////////////////////////////////////////////////////////////
+
 	var halfThicknessOfPost = 1.2/288;
-    // Drawing all the posts
+	//side of floor - post offsets
+	var lateral = 2-2*halfThicknessOfPost;
+    // Center post on edge
+    var postOffset = -1+halfThicknessOfPost
+    // place wall after post
+    var wallOffset = -1+2*halfThicknessOfPost
+    // half the wall, ~0.116 
+    var halfWallLateral = (2-17*2*halfThicknessOfPost)/32
+
+    // Drawing posts
     initBuffers(models['post']);
     var x;
     var z;
     for(var i=0; i<=16; i++)
         for(var j=0; j<=16; j++){
-        		// center post on corner //space-2 posts  //divided in 16 segments
-    		x = -1+halfThicknessOfPost + (2-2*halfThicknessOfPost)/16 * i;
-    		z = -1+halfThicknessOfPost + (2-2*halfThicknessOfPost)/16 * j;
+        	   			// each of 16 segments
+    		x = postOffset + lateral/16 * i;
+    		z = postOffset + lateral/16 * j;
             drawModel( null, null, null,
                        null, null, null,
                        x, 0, z,
                        mvMatrix,
                        primitiveType );
     }
-
-
     // Drawing border walls
     initBuffers(models['wall']);
     var x;
     for(var i=0 ; i<16; i++){
-    	//	one post offset				half the wall, ~0.116    		//space - postOffsets  //divided in 16 segments      
-    	x = -1+2*halfThicknessOfPost + (2-17*2*halfThicknessOfPost)/32 + (2-2*halfThicknessOfPost)/16*i;
+    	//	one post offset			    // each of 16 segments     
+    	x = wallOffset + halfWallLateral + lateral/16 * i;
     	// front wall
         drawModel( null, null, null,
 		           null, null, null,
-		           x, 0,  1-halfThicknessOfPost,
+		           x, 0, -postOffset,
 		           mvMatrix,
 		           primitiveType );
         // back wall
         drawModel( null, 180, null,
                    null, null, null,
-                   x, 0, -1+halfThicknessOfPost,
+                   x, 0, postOffset,
                    mvMatrix,
                    primitiveType );
     }
     var z;
     for(var i=0 ; i<16; i++){
-    	//	one post offset				half the wall, ~0.116    		//space - postOffsets  //divided in 16 segments 
-    	z = -1+2*halfThicknessOfPost + (2-17*2*halfThicknessOfPost)/32 + (2-2*halfThicknessOfPost)/16*i;
+    	//	one post offset				// each of 16 segments
+    	z = wallOffset + halfWallLateral + lateral/16 * i;
     	// right wall
         drawModel( null, 90, null,
                    null, null, null,
-                   1 - halfThicknessOfPost, 0, z,
+                   -postOffset, 0, z,
                    mvMatrix,
                    primitiveType );
         // left wall   	
         drawModel( null, 270, null,
                    null, null, null,
-                   -1 + halfThicknessOfPost, 0, z,
+                   postOffset, 0, z,
                    mvMatrix,
                    primitiveType );
     }
