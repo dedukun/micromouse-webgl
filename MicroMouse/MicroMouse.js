@@ -294,83 +294,83 @@ function drawScene() {
 
 //----------------------------------------------------------------------------
 
-//  Drawing the empty Map
+// Drawing the empty Map
 
 function drawEmptyMap(mvMatrix){
 
-    // Drawing the floor
-    initBuffers(models['floor']);
+	// Drawing the floor
+	initBuffers(models['floor']);
 
 	// Instantianting the current model
 	drawModel( null, null, null,
-	           null, null, null,
-	           null, null, null,
-	           mvMatrix,
-	           primitiveType );
+			 null, null, null,
+			 null, null, null,
+			 mvMatrix,
+			 primitiveType );
 
 /////////////////////////////////////////////////////////////
 
 	var halfThicknessOfPost = 1.2/288;
 	//side of floor - post offsets
 	var lateral = 2-2*halfThicknessOfPost;
-    // Center post on edge
-    var postOffset = -1+halfThicknessOfPost
-    // place wall after post
-    var wallOffset = -1+2*halfThicknessOfPost
-    // half the wall, ~0.116 
-    var halfWallLateral = (2-17*2*halfThicknessOfPost)/32
+	// Center post on edge
+	var postOffset = -1+halfThicknessOfPost
+	// place wall after post
+	var wallOffset = -1+2*halfThicknessOfPost
+	// half the wall, ~0.116 
+	var halfWallLateral = (2-17*2*halfThicknessOfPost)/32
 
-    // Drawing posts
-    initBuffers(models['post']);
-    var x;
-    var z;
-    for(var i=0; i<=16; i++)
-        for(var j=0; j<=16; j++){
-        	   			// each of 16 segments
-    		x = postOffset + lateral/16 * i;
-    		z = postOffset + lateral/16 * j;
-            drawModel( null, null, null,
-                       null, null, null,
-                       x, 0, z,
-                       mvMatrix,
-                       primitiveType );
-    }
-    // Drawing border walls
-    initBuffers(models['wall']);
-    var x;
-    for(var i=0 ; i<16; i++){
-    	//	one post offset			    // each of 16 segments     
-    	x = wallOffset + halfWallLateral + lateral/16 * i;
-    	// front wall
-        drawModel( null, null, null,
-		           null, null, null,
-		           x, 0, -postOffset,
-		           mvMatrix,
-		           primitiveType );
-        // back wall
-        drawModel( null, 180, null,
-                   null, null, null,
-                   x, 0, postOffset,
-                   mvMatrix,
-                   primitiveType );
-    }
-    var z;
-    for(var i=0 ; i<16; i++){
-    	//	one post offset				// each of 16 segments
-    	z = wallOffset + halfWallLateral + lateral/16 * i;
-    	// right wall
-        drawModel( null, 90, null,
-                   null, null, null,
-                   -postOffset, 0, z,
-                   mvMatrix,
-                   primitiveType );
-        // left wall   	
-        drawModel( null, 270, null,
-                   null, null, null,
-                   postOffset, 0, z,
-                   mvMatrix,
-                   primitiveType );
-    }
+	// Drawing posts
+	initBuffers(models['post']);
+	var x;
+	var z;
+	for(var i=0; i<=16; i++)
+		for(var j=0; j<=16; j++){
+							// each of 16 segments
+			x = postOffset + lateral/16 * i;
+			z = postOffset + lateral/16 * j;
+			drawModel(null, null, null,
+					null, null, null,
+					x, 0, z,
+					mvMatrix,
+					primitiveType );
+	}
+	// Drawing border walls
+	initBuffers(models['wall']);
+	var x;
+	for(var i=0 ; i<16; i++){
+		//	one post offset 				 each of 16 segments	
+		x = wallOffset + halfWallLateral + lateral/16 * i;
+		// front wall
+		drawModel(null, null, null,
+				null, null, null,
+				x, 0, -postOffset,
+				mvMatrix,
+				primitiveType );
+		// back wall
+		drawModel(null, 180, null,
+				null, null, null,
+				x, 0, postOffset,
+				mvMatrix,
+				primitiveType );
+	}
+	var z;
+	for(var i=0 ; i<16; i++){
+		//	one post offset					 each of 16 segments
+		z = wallOffset + halfWallLateral + lateral/16 * i;
+		// right wall
+		drawModel(null, 90, null,
+				null, null, null,
+				-postOffset, 0, z,
+				mvMatrix,
+				primitiveType );
+		// left wall
+		drawModel(null, 270, null,
+				null, null, null,
+				postOffset, 0, z,
+				mvMatrix,
+				primitiveType );
+	}
 }
 
 function drawMap(mvMatrix){}
