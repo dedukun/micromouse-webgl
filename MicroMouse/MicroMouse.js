@@ -28,39 +28,6 @@ var globalSz = 1;
 var globalSy = 1;
 var globalSx = 1;
 
-// The local transformation parameters
-
-// The translation vector
-var tx = 0.0;
-var ty = 0.0;
-var tz = 0.0;
-
-// The rotation angles in degrees
-var angleXX = 0.0;
-var angleYY = 0.0;
-var angleZZ = 0.0;
-
-// The scaling factors
-var sx = 1;
-var sy = 1;
-var sz = 1;
-
-// Global Animation controls
-var globalRotationYY_ON = 1;
-var globalRotationYY_DIR = 1;
-var globalRotationYY_SPEED = 1;
-
-// Local Animation controls
-var rotationXX_ON = 1;
-var rotationXX_DIR = 1;
-var rotationXX_SPEED = 1;
-var rotationYY_ON = 1;
-var rotationYY_DIR = 1;
-var rotationYY_SPEED = 1;
-var rotationZZ_ON = 1;
-var rotationZZ_DIR = 1;
-var rotationZZ_SPEED = 1;
-
 // To allow choosing the way of drawing the model triangles
 var primitiveType = null;
 
@@ -83,55 +50,6 @@ var nPhong = 100;
 
 // Dictionary with models
 var models = null;
-
-var vertices = [
-        -0.058333,  0.000000,  0.004167,
-         0.058333,  0.000000,  0.004167,
-         0.058333,  0.034722,  0.004167,
-        -0.058333,  0.034722,  0.004167,
-
-         0.058333,  0.000000,  0.004167,
-         0.058333,  0.000000, -0.004167,
-         0.058333,  0.034722, -0.004167,
-         0.058333,  0.034722,  0.004167,
-
-        -0.058333,  0.000000, -0.004167,
-        -0.058333,  0.034722, -0.004167,
-         0.058333,  0.034722, -0.004167,
-         0.058333,  0.000000, -0.004167,
-
-        -0.058333,  0.000000, -0.004167,
-        -0.058333,  0.000000,  0.004167,
-        -0.058333,  0.034722,  0.004167,
-        -0.058333,  0.034722, -0.004167,
-
-        -0.058333,  0.034722, -0.004167,
-        -0.058333,  0.034722,  0.004167,
-         0.058333,  0.034722,  0.004167,
-         0.058333,  0.034722, -0.004167,
-
-        -0.058333,  0.000000,  0.004167,
-        -0.058333,  0.000000, -0.004167,
-         0.058333,  0.000000, -0.004167,
-         0.058333,  0.000000,  0.004167
-];
-
-// Vertex indices defining the triangles
-
-var cubeVertexIndices = [
-
-            0, 1, 2,      0, 2, 3,    // Front face
-
-            4, 5, 6,      4, 6, 7,    // Back face
-
-            8, 9, 10,     8, 10, 11,  // Top face
-
-            12, 13, 14,   12, 14, 15, // Bottom face
-
-            16, 17, 18,   16, 18, 19, // Right face
-
-            20, 21, 22,   20, 22, 23  // Left face
-];
 
 // And their colour
 
@@ -374,6 +292,10 @@ function drawScene() {
 	countFrames();
 }
 
+//----------------------------------------------------------------------------
+
+//  Drawing the empty Map
+
 function drawEmptyMap(mvMatrix){
 
     // Drawing the floor
@@ -435,7 +357,17 @@ function drawEmptyMap(mvMatrix){
 
 function drawMap(mvMatrix){}
 
-function drawMouse(mvMatrix){}
+function drawMouse(mvMatrix){
+    // Drawing the mouse
+    initBuffers(models['mouse']);
+
+	// Instantianting the current model
+	drawModel( null, models['mouse'].angleYY, null,
+	           null, null, null,
+	           models['mouse'].tx, 0, models['mouse'].tz,
+	           mvMatrix,
+	           primitiveType );
+}
 
 function drawMarkers(mvMatrix){}
 
@@ -568,22 +500,24 @@ function handleKeys() {
 	// W or w
 	if (currentlyPressedKeys[87] || currentlyPressedKeys[119]) {
 		// go up
-		ty += 0.01;
+		models['mouse'].tx += 0.01 * Math.cos(models['mouse'].angleYY/180*Math.PI);
+		models['mouse'].tz -= 0.01 * Math.sin(models['mouse'].angleYY/180*Math.PI);
 	}
 	// A or a
 	if (currentlyPressedKeys[65] || currentlyPressedKeys[97]) {
 		// go left
-		tx -= 0.01;
+		models['mouse'].angleYY += 1.0;
 	}
 	// S or s
 	if (currentlyPressedKeys[83] || currentlyPressedKeys[115]) {
 		// go down
-		ty -= 0.01;
+		models['mouse'].tx -= 0.01 * Math.cos(models['mouse'].angleYY/180*Math.PI);
+		models['mouse'].tz += 0.01 * Math.sin(models['mouse'].angleYY/180*Math.PI);
 	}
 	// D or d
 	if (currentlyPressedKeys[68] || currentlyPressedKeys[100]) {
 		// go right
-		tx += 0.01;
+		models['mouse'].angleYY -= 1.0;
 	}
 }
 
