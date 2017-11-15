@@ -308,20 +308,16 @@ function drawEmptyMap(mvMatrix){
 	           mvMatrix,
 	           primitiveType );
 
-
+	var halfThicknessOfPost = 1.2/288;
     // Drawing all the posts
     initBuffers(models['post']);
     var x;
     var z;
     for(var i=0; i<=16; i++)
         for(var j=0; j<=16; j++){
-    		x = -1 + 2/16*i;
-    		z = -1 + 2/16*j;
-        	if (i == 0)  { x += 1.2/288; }
-        	if (i == 16) { x -= 1.2/288; }
-        	if (j == 0)  { z += 1.2/288; }
-        	if (j == 16) { z -= 1.2/288; }
-            // Instantianting the current model
+        		// center post on corner //space-2 posts  //divided in 16 segments
+    		x = -1+halfThicknessOfPost + (2-2*halfThicknessOfPost)/16 * i;
+    		z = -1+halfThicknessOfPost + (2-2*halfThicknessOfPost)/16 * j;
             drawModel( null, null, null,
                        null, null, null,
                        x, 0, z,
@@ -333,34 +329,36 @@ function drawEmptyMap(mvMatrix){
     // Drawing border walls
     initBuffers(models['wall']);
     var x;
-    var z;
     for(var i=0 ; i<16; i++){
-    	x = -1 + 2/32 + 2/16*i;
+    	//	one post offset				half the wall, ~0.116    		//space - postOffsets  //divided in 16 segments      
+    	x = -1+2*halfThicknessOfPost + (2-17*2*halfThicknessOfPost)/32 + (2-2*halfThicknessOfPost)/16*i;
     	// front wall
         drawModel( null, null, null,
 		           null, null, null,
-		           x, 0,  1-1.2/288,
+		           x, 0,  1-halfThicknessOfPost,
 		           mvMatrix,
 		           primitiveType );
         // back wall
         drawModel( null, 180, null,
                    null, null, null,
-                   x, 0, -1+1.2/288,
+                   x, 0, -1+halfThicknessOfPost,
                    mvMatrix,
                    primitiveType );
     }
+    var z;
     for(var i=0 ; i<16; i++){
-    	z = -1 + 2/32 + 2/16*i;
+    	//	one post offset				half the wall, ~0.116    		//space - postOffsets  //divided in 16 segments 
+    	z = -1+2*halfThicknessOfPost + (2-17*2*halfThicknessOfPost)/32 + (2-2*halfThicknessOfPost)/16*i;
     	// right wall
         drawModel( null, 90, null,
                    null, null, null,
-                    1-1.2/288, 0, z,
+                   1 - halfThicknessOfPost, 0, z,
                    mvMatrix,
                    primitiveType );
         // left wall   	
         drawModel( null, 270, null,
                    null, null, null,
-                   -1+1.2/288, 0, z,
+                   -1 + halfThicknessOfPost, 0, z,
                    mvMatrix,
                    primitiveType );
     }
