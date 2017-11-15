@@ -311,16 +311,20 @@ function drawEmptyMap(mvMatrix){
 /////////////////////////////////////////////////////////////
 
 	var halfThicknessOfPost = 1.2/288;
-	//side of floor - post offsets
+	
+	// lateral of floor minus post offsets
 	var lateral = 2-2*halfThicknessOfPost;
-	// Center post on edge
+
+	// center post on edge
 	var postOffset = -1+halfThicknessOfPost
-	// place wall after post
+
+	// place 1st wall after post
 	var wallOffset = -1+2*halfThicknessOfPost
+
 	// half the wall, ~0.116 
 	var halfWallLateral = (2-17*2*halfThicknessOfPost)/32
 
-	// Drawing posts
+	// drawing posts
 	initBuffers(models['post']);
 	var x;
 	var z;
@@ -335,7 +339,7 @@ function drawEmptyMap(mvMatrix){
 					mvMatrix,
 					primitiveType );
 	}
-	// Drawing border walls
+	// drawing border walls
 	initBuffers(models['wall']);
 	var x;
 	for(var i=0 ; i<16; i++){
