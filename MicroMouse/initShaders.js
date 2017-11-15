@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-//  initShaders.js 
+//  initShaders.js
 //
 //	Getting, compiling and linking the vertex and the fragment shaders
 //
@@ -64,18 +64,18 @@ function initShaders( gl ) {
 	}
 
 	gl.useProgram(shaderProgram);
-	
+
 	// Shader input
 
-	// Vertex Coordinates 
-	
+	// Vertex Coordinates
+
 	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "vPosition");
 	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-	// Vertex Normals 
-	
+	// Vertex Normals
+
 	shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "vNormal");
 	gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-	
+
 	return shaderProgram;
 }

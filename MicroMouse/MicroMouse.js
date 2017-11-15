@@ -11,7 +11,7 @@
 //
 
 // WebGL context
-var gl = null; 
+var gl = null;
 
 var shaderProgram = null;
 var triangleVertexPositionBuffer = null;
@@ -75,6 +75,7 @@ var kSpec = [ 0.7, 0.7, 0.7 ];
 var nPhong = 100;
 
 // Initial model has just ONE TRIANGLE
+var models;
 var vertices = [
 
 		// FRONTAL TRIANGLE
@@ -527,10 +528,12 @@ function handleMouseMove(event) {
 //----------------------------------------------------------------------------
 
 function setEventListeners( canvas ){
+
     // Mouse + Keyboard Events
     canvas.onmousedown = handleMouseDown;
     document.onmouseup = handleMouseUp;
     document.onmousemove = handleMouseMove;
+
     // Handling the keyboard
     function handleKeyDown(event) {
         currentlyPressedKeys[event.keyCode] = true;
@@ -541,48 +544,6 @@ function setEventListeners( canvas ){
 	document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
 
-	// http://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
-	document.getElementById("file").onchange = function(){
-		var file = this.files[0];
-		var reader = new FileReader();
-		reader.onload = function( progressEvent ){
-			// Entire file read as a string
-			// The tokens/values in the file
-
-			// Separation between values is 1 or mode whitespaces
-			var tokens = this.result.split(/\s\s*/);
-
-			// Array of values; each value is a string
-			var numVertices = parseInt( tokens[0] );
-
-			// For every vertex we have 3 floating point values
-			var i, j;
-			var aux = 1;
-			var newVertices = [];
-
-			for( i = 0; i < numVertices; i++ ) {
-				for( j = 0; j < 3; j++ ) {
-					newVertices[ 3 * i + j ] = parseFloat( tokens[ aux++ ] );
-				}
-			}
-			// Assigning to the current model
-			vertices = newVertices.slice();
-
-			//Computing the triangle normal vector for every vertex
-			computeVertexNormals( vertices, normals );
-
-			// To render the model just read
-			initBuffers();
-
-			// Reset the transformations
-			tx = ty = tz = 0.0;
-			angleXX = angleYY = angleZZ = 0.0;
-			sx = sy = sz = 1;
-		};
-
-		// Entire file read as a string
-		reader.readAsText( file );
-	}
 	// Dropdown list
 	var list = document.getElementById("rendering-mode-selection");
 	list.addEventListener("click", function(){
@@ -647,6 +608,67 @@ function setEventListeners( canvas ){
 
 //----------------------------------------------------------------------------
 //
+// Load Map
+//
+
+function loadMapData(){
+
+	// http://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
+	var file = this.files[0];
+	var reader = new FileReader();
+	reader.onload = function( progressEvent ){
+		// Entire file read as a string
+		// The tokens/values in the file
+
+		// Separation between values is 1 or mode whitespaces
+		var tokens = this.result.split(/\s\s*/);
+
+		// Array of values; each value is a string
+		var numVertices = parseInt( tokens[0] );
+
+		// For every vertex we have 3 floating point values
+		var i, j;
+		var aux = 1;
+		var newVertices = [];
+
+		for( i = 0; i < numVertices; i++ ) {
+			for( j = 0; j < 3; j++ ) {
+				newVertices[ 3 * i + j ] = parseFloat( tokens[ aux++ ] );
+			}
+		}
+		// Assigning to the current model
+		vertices = newVertices.slice();
+
+		//Computing the triangle normal vector for every vertex
+		computeVertexNormals( vertices, normals );
+
+		// To render the model just read
+		initBuffers();
+
+		// Reset the transformations
+		tx = ty = tz = 0.0;
+		angleXX = angleYY = angleZZ = 0.0;
+		sx = sy = sz = 1;
+	};
+
+	// Entire file read as a string
+	reader.readAsText( file );
+}
+
+function loadMap(filename){
+    //https://dannywoodz.wordpress.com/2014/12/16/webgl-from-scratch-loading-a-mesh/
+    $.ajax({
+        url: filename,
+        dataType: 'text'
+      }).done(function(data) {
+        loadMapData(data);
+      }).fail(function() {
+        alert('Faild to retrieve [' + filename + "]");
+      });
+}
+
+//----------------------------------------------------------------------------
+//
 // WebGL Initialization
 //
 
@@ -673,6 +695,8 @@ function initWebGL( canvas ) {
 		// Enable DEPTH-TEST
 		gl.enable( gl.DEPTH_TEST );
 
+        //Load Map
+
 	} catch (e) {
 	}
 	if (!gl) {
@@ -687,10 +711,9 @@ function runWebGL() {
 	var canvas = document.getElementById("my-canvas");
 	initWebGL( canvas );
 	shaderProgram = initShaders( gl );
+    models = getModels();
 	setEventListeners( canvas );
 	initBuffers();
 	tick();		// Timer that controls the rendering / animation
 	outputInfos();
 }
-
-
