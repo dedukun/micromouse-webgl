@@ -339,30 +339,28 @@ function drawEmptyMap(mvMatrix){
     	// front wall
         drawModel( null, null, null,
 		           null, null, null,
-		           x, 0,  1 - 1.2/288,
+		           x, 0,  1-1.2/288,
 		           mvMatrix,
 		           primitiveType );
         // back wall
         drawModel( null, 180, null,
                    null, null, null,
-                   x, 0, -1 + 1.2/288,
+                   x, 0, -1+1.2/288,
                    mvMatrix,
                    primitiveType );
     }
     for(var i=0 ; i<16; i++){
     	z = -1 + 2/32 + 2/16*i;
-    	if (j == 0)  { x += 1.2/288; }
-    	if (j == 16) { x -= 1.2/288; }
     	// right wall
         drawModel( null, 90, null,
                    null, null, null,
-                    1 - 1.2/288, 0, z,
+                    1-1.2/288, 0, z,
                    mvMatrix,
                    primitiveType );
         // left wall   	
         drawModel( null, 270, null,
                    null, null, null,
-                   -1 + 1.2/288, 0, z,
+                   -1+1.2/288, 0, z,
                    mvMatrix,
                    primitiveType );
     }
