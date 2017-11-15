@@ -255,7 +255,6 @@ function initBuffers(model) {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['vertices']), gl.STATIC_DRAW);
 	cubeVertexPositionBuffer.itemSize = 3;
 	cubeVertexPositionBuffer.numItems = model['vertices'].length / 3;
-                                        // models['?']['vertices'].length
 
 	// Colors
 
@@ -285,16 +284,20 @@ function drawModel( angleXX, angleYY, angleZZ,
 					primitiveType ) {
 
     // Pay attention to transformation order !!
+    if(tx != null)
+    	mvMatrix = mult( mvMatrix, translationMatrix( tx, ty, tz ) );
 
-	mvMatrix = mult( mvMatrix, translationMatrix( tx, ty, tz ) );
+    if(angleZZ != null)
+    	mvMatrix = mult( mvMatrix, rotationZZMatrix( angleZZ ) );
 
-	mvMatrix = mult( mvMatrix, rotationZZMatrix( angleZZ ) );
+    if(angleYY != null)
+    	mvMatrix = mult( mvMatrix, rotationYYMatrix( angleYY ) );
 
-	mvMatrix = mult( mvMatrix, rotationYYMatrix( angleYY ) );
+    if(angleXX != null)
+    	mvMatrix = mult( mvMatrix, rotationXXMatrix( angleXX ) );
 
-	mvMatrix = mult( mvMatrix, rotationXXMatrix( angleXX ) );
-
-	mvMatrix = mult( mvMatrix, scalingMatrix( sx, sy, sz ) );
+    if(sx != null)
+    	mvMatrix = mult( mvMatrix, scalingMatrix( sx, sy, sz ) );
 
 	// Passing the Model View Matrix to apply the current transformation
 
@@ -377,9 +380,9 @@ function drawEmptyMap(mvMatrix){
     initBuffers(models['floor']);
 
 	// Instantianting the current model
-	drawModel( angleXX, angleYY, angleZZ,
-	           sx, sy, sz,
-	           tx, ty, tz,
+	drawModel( null, null, null,
+	           null, null, null,
+	           null, null, null,
 	           mvMatrix,
 	           primitiveType );
 
@@ -390,11 +393,43 @@ function drawEmptyMap(mvMatrix){
     for(var xx = -8; xx <= 8; xx++)
         for(var zz = -8; zz <= 8; zz++){
             // Instantianting the current model
-            drawModel( angleXX, angleYY, angleZZ,
-                       sx, sy, sz,
-                       tx + (xx * 0.1245), ty, tz + (zz * 0.1245),
+            drawModel( null, null, null,
+                       null, null, null,
+                       xx * 0.1245, 0, zz * 0.1245,
                        mvMatrix,
                        primitiveType );
+    }
+
+
+    // Drawing border walls
+    initBuffers(models['wall']);
+
+    for(var xx = -8; xx < 8; xx++){
+        drawModel( null, null, null,
+                   null, null, null,
+                   0.06225+ (xx*0.1245), 0, -1 ,
+                   mvMatrix,
+                   primitiveType );
+
+        drawModel( null, null, null,
+                   null, null, null,
+                   0.06225 + (xx*0.1245), 0, 1,
+                   mvMatrix,
+                   primitiveType );
+    }
+
+    for(var zz = -8; zz < 8; zz++){
+        drawModel( null, 90, null,
+                   null, null, null,
+                   -1, 0, 0.06225 + (zz * 0.1245),
+                   mvMatrix,
+                   primitiveType );
+
+        drawModel( null, 90, null,
+                   null, null, null,
+                   1, 0, 0.06225 + (zz * 0.1245),
+                   mvMatrix,
+                   primitiveType );
     }
 }
 
@@ -600,7 +635,7 @@ function handleMouseMove(event) {
     lastMouseX = newX
 
     lastMouseY = newY;
-  }
+}
 
 //----------------------------------------------------------------------------
 
