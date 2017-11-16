@@ -1,5 +1,5 @@
-// Returns dictionary with all models used in the scene
-function getModels(){
+// Returns dictionary with all models and variables used in the app
+function getSimulationVars(){
     return {
         floor: {
             vertices:
@@ -91,7 +91,9 @@ function getModels(){
                 12, 13, 14,  12, 14, 15,
                 16, 17, 18,  16, 18, 19,
                 20, 21, 22,  20, 22, 23
-            ]
+            ],
+            hor: [],
+            ver: []
         },
         post: {
             vertices:

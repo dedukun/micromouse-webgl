@@ -48,8 +48,8 @@ var kSpec = [ 0.7, 0.7, 0.7 ];
 // Phong coef.
 var nPhong = 100;
 
-// Dictionary with models
-var models = null;
+// Dictionary with models and variables
+var simVars = null;
 
 //------------------------------------
 // MicroMouse variables
@@ -302,7 +302,7 @@ function drawScene() {
 function drawEmptyMap(mvMatrix){
 
 	// Drawing the floor
-	initBuffers(models['floor']);
+	initBuffers(simVars['floor']);
 
 	// Instantianting the current model
 	drawModel( null, null, null,
@@ -327,7 +327,7 @@ function drawEmptyMap(mvMatrix){
 	var halfWallLateral = (2-17*2*halfThicknessOfPost)/32
 
 	// drawing posts
-	initBuffers(models['post']);
+	initBuffers(simVars['post']);
 	var x;
 	var z;
 	for(var i=0; i<=16; i++)
@@ -342,7 +342,7 @@ function drawEmptyMap(mvMatrix){
 	}
 
 	// drawing border walls
-	initBuffers(models['wall']);
+	initBuffers(simVars['wall']);
 	var x;
 	for(var i=0 ; i<16; i++){
 		//	one post offset 				 each of 16 segments
@@ -379,11 +379,11 @@ function drawMap(mvMatrix){}
 
 function drawMouse(mvMatrix){
     // Drawing the mouse
-    initBuffers(models['mouse']);
+    initBuffers(simVars['mouse']);
 
 	// Instantianting the current model
-	drawModel( null, models['mouse'].angleYY, null,
-	           models['mouse'].tx, 0, models['mouse'].tz,
+	drawModel( null, simVars['mouse'].angleYY, null,
+	           simVars['mouse'].tx, 0, simVars['mouse'].tz,
 	           mvMatrix,
 	           primitiveType );
 }
@@ -459,24 +459,24 @@ function handleKeys() {
 	// W or w
 	if (currentlyPressedKeys[87] || currentlyPressedKeys[119]) {
 		// go up
-		models['mouse'].tx += 0.0075 * Math.cos(models['mouse'].angleYY/180*Math.PI);
-		models['mouse'].tz -= 0.0075 * Math.sin(models['mouse'].angleYY/180*Math.PI);
+		simVars['mouse'].tx += 0.0075 * Math.cos(simVars['mouse'].angleYY/180*Math.PI);
+		simVars['mouse'].tz -= 0.0075 * Math.sin(simVars['mouse'].angleYY/180*Math.PI);
 	}
 	// A or a
 	if (currentlyPressedKeys[65] || currentlyPressedKeys[97]) {
 		// go left
-		models['mouse'].angleYY += 2.0;
+		simVars['mouse'].angleYY += 2.0;
 	}
 	// S or s
 	if (currentlyPressedKeys[83] || currentlyPressedKeys[115]) {
 		// go down
-		models['mouse'].tx -= 0.0075 * Math.cos(models['mouse'].angleYY/180*Math.PI);
-		models['mouse'].tz += 0.0075 * Math.sin(models['mouse'].angleYY/180*Math.PI);
+		simVars['mouse'].tx -= 0.0075 * Math.cos(simVars['mouse'].angleYY/180*Math.PI);
+		simVars['mouse'].tz += 0.0075 * Math.sin(simVars['mouse'].angleYY/180*Math.PI);
 	}
 	// D or d
 	if (currentlyPressedKeys[68] || currentlyPressedKeys[100]) {
 		// go right
-		models['mouse'].angleYY -= 2.0;
+		simVars['mouse'].angleYY -= 2.0;
 	}
 }
 
@@ -592,6 +592,31 @@ function setEventListeners( canvas ){
                     return;
                 }
             }
+
+            // Horizontal walls
+            for(var line = 0; line < 33; line+=2){
+                var tmpWalls = [];
+                for(var x = 0; x < 31; x+=2){
+                    tmpWalls[x/2] = (mapStringArray[line][x+1] == '#') | 0;
+                }
+
+                simVars['wall']['hor'][line/2] = tmpWalls;
+            }
+
+            console.log(simVars['wall']['hor']);
+            // Vertical walls
+            for(var line = 0; line < 32; line+=2){
+                var tmpWalls = [];
+                for(var x = 0; x < 33; x+=2){
+                    tmpWalls[x/2] = (mapStringArray[line+1][x] == '#') | 0;
+                }
+
+                simVars['wall']['ver'][line/2] = tmpWalls;
+            }
+
+            console.log(simVars['wall']['ver']);
+
+
         };
 
         // Entire file read as a string
@@ -751,7 +776,7 @@ function runWebGL() {
 
 	setEventListeners( canvas );
 
-    models = getModels(); // Get models used
+    simVars = getSimulationVars(); // Get models and variables used
 
 	//initBuffers();
 
