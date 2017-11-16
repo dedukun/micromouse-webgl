@@ -196,7 +196,6 @@ function initBuffers(model) {
 //  Drawing the model
 
 function drawModel( angleXX, angleYY, angleZZ,
-					sx, sy, sz,
 					tx, ty, tz,
 					mvMatrix,
 					primitiveType ) {
@@ -213,9 +212,6 @@ function drawModel( angleXX, angleYY, angleZZ,
 
     if(angleXX != null)
     	mvMatrix = mult( mvMatrix, rotationXXMatrix( angleXX ) );
-
-    if(sx != null)
-    	mvMatrix = mult( mvMatrix, scalingMatrix( sx, sy, sz ) );
 
 	// Passing the Model View Matrix to apply the current transformation
 
@@ -304,14 +300,13 @@ function drawEmptyMap(mvMatrix){
 	// Instantianting the current model
 	drawModel( null, null, null,
 			 null, null, null,
-			 null, null, null,
 			 mvMatrix,
 			 primitiveType );
 
 /////////////////////////////////////////////////////////////
 
 	var halfThicknessOfPost = 1.2/288;
-	
+
 	// lateral of floor minus post offsets
 	var lateral = 2-2*halfThicknessOfPost;
 
@@ -321,7 +316,7 @@ function drawEmptyMap(mvMatrix){
 	// place 1st wall after post
 	var wallOffset = -1+2*halfThicknessOfPost
 
-	// half the wall, ~0.116 
+	// half the wall, ~0.116
 	var halfWallLateral = (2-17*2*halfThicknessOfPost)/32
 
 	// drawing posts
@@ -334,7 +329,6 @@ function drawEmptyMap(mvMatrix){
 			x = postOffset + lateral/16 * i;
 			z = postOffset + lateral/16 * j;
 			drawModel(null, null, null,
-					null, null, null,
 					x, 0, z,
 					mvMatrix,
 					primitiveType );
@@ -343,17 +337,15 @@ function drawEmptyMap(mvMatrix){
 	initBuffers(models['wall']);
 	var x;
 	for(var i=0 ; i<16; i++){
-		//	one post offset 				 each of 16 segments	
+		//	one post offset 				 each of 16 segments
 		x = wallOffset + halfWallLateral + lateral/16 * i;
 		// front wall
 		drawModel(null, null, null,
-				null, null, null,
 				x, 0, -postOffset,
 				mvMatrix,
 				primitiveType );
 		// back wall
 		drawModel(null, 180, null,
-				null, null, null,
 				x, 0, postOffset,
 				mvMatrix,
 				primitiveType );
@@ -364,13 +356,11 @@ function drawEmptyMap(mvMatrix){
 		z = wallOffset + halfWallLateral + lateral/16 * i;
 		// right wall
 		drawModel(null, 90, null,
-				null, null, null,
 				-postOffset, 0, z,
 				mvMatrix,
 				primitiveType );
 		// left wall
 		drawModel(null, 270, null,
-				null, null, null,
 				postOffset, 0, z,
 				mvMatrix,
 				primitiveType );
@@ -385,71 +375,12 @@ function drawMouse(mvMatrix){
 
 	// Instantianting the current model
 	drawModel( null, models['mouse'].angleYY, null,
-	           null, null, null,
 	           models['mouse'].tx, 0, models['mouse'].tz,
 	           mvMatrix,
 	           primitiveType );
 }
 
 function drawMarkers(mvMatrix){}
-
-//----------------------------------------------------------------------------
-//
-// Animation
-//
-
-// Updating transformation parameters
-
-var lastTime = 0;
-
-function animate() {
-
-	var timeNow = new Date().getTime();
-
-	if( lastTime != 0 ) {
-
-		var elapsed = timeNow - lastTime;
-
-		// Global rotation
-
-		if( globalRotationYY_ON ) {
-
-			globalAngleYY += globalRotationYY_DIR * globalRotationYY_SPEED * (90 * elapsed) / 1000.0;
-	    }
-
-		// Local rotations
-
-		if( rotationXX_ON ) {
-
-			angleXX += rotationXX_DIR * rotationXX_SPEED * (90 * elapsed) / 1000.0;
-	    }
-
-		if( rotationYY_ON ) {
-
-			angleYY += rotationYY_DIR * rotationYY_SPEED * (90 * elapsed) / 1000.0;
-	    }
-
-		if( rotationZZ_ON ) {
-
-			angleZZ += rotationZZ_DIR * rotationZZ_SPEED * (90 * elapsed) / 1000.0;
-	    }
-
-		// Rotating the light sources
-        /*
-		for(var i = 0; i < lightSources.length; i++ )
-	    {
-			if( lightSources[i].isRotYYOn() ) {
-
-				var angle = lightSources[i].getRotAngleYY() + lightSources[i].getRotationSpeed() * (90 * elapsed) / 1000.0;
-
-				lightSources[i].setRotAngleYY( angle );
-			}
-		}
-        */
-}
-
-	lastTime = timeNow;
-}
 
 
 //----------------------------------------------------------------------------
@@ -466,8 +397,6 @@ function tick() {
     handleKeys();
 
 	drawScene();
-
-	//animate();
 }
 
 
