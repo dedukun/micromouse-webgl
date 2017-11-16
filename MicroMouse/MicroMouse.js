@@ -51,6 +51,13 @@ var nPhong = 100;
 // Dictionary with models
 var models = null;
 
+//------------------------------------
+// MicroMouse variables
+
+var walls = null;
+
+var visited = null;
+
 // And their colour
 
 var colors = [
@@ -303,7 +310,7 @@ function drawEmptyMap(mvMatrix){
 			 mvMatrix,
 			 primitiveType );
 
-/////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
 
 	var halfThicknessOfPost = 1.2/288;
 
@@ -333,6 +340,7 @@ function drawEmptyMap(mvMatrix){
 					mvMatrix,
 					primitiveType );
 	}
+
 	// drawing border walls
 	initBuffers(models['wall']);
 	var x;
@@ -451,24 +459,24 @@ function handleKeys() {
 	// W or w
 	if (currentlyPressedKeys[87] || currentlyPressedKeys[119]) {
 		// go up
-		models['mouse'].tx += 0.01 * Math.cos(models['mouse'].angleYY/180*Math.PI);
-		models['mouse'].tz -= 0.01 * Math.sin(models['mouse'].angleYY/180*Math.PI);
+		models['mouse'].tx += 0.0075 * Math.cos(models['mouse'].angleYY/180*Math.PI);
+		models['mouse'].tz -= 0.0075 * Math.sin(models['mouse'].angleYY/180*Math.PI);
 	}
 	// A or a
 	if (currentlyPressedKeys[65] || currentlyPressedKeys[97]) {
 		// go left
-		models['mouse'].angleYY += 1.0;
+		models['mouse'].angleYY += 2.0;
 	}
 	// S or s
 	if (currentlyPressedKeys[83] || currentlyPressedKeys[115]) {
 		// go down
-		models['mouse'].tx -= 0.01 * Math.cos(models['mouse'].angleYY/180*Math.PI);
-		models['mouse'].tz += 0.01 * Math.sin(models['mouse'].angleYY/180*Math.PI);
+		models['mouse'].tx -= 0.0075 * Math.cos(models['mouse'].angleYY/180*Math.PI);
+		models['mouse'].tz += 0.0075 * Math.sin(models['mouse'].angleYY/180*Math.PI);
 	}
 	// D or d
 	if (currentlyPressedKeys[68] || currentlyPressedKeys[100]) {
 		// go right
-		models['mouse'].angleYY -= 1.0;
+		models['mouse'].angleYY -= 2.0;
 	}
 }
 
@@ -541,25 +549,54 @@ function setEventListeners( canvas ){
 	document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
 
-	// Dropdown list
-	var list = document.getElementById("rendering-mode-selection");
-	list.addEventListener("click", function(){
+	document.getElementById("file").onchange = function(){
 
-		// Getting the selection
-		var mode = list.selectedIndex;
+        // http://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
+        var file = this.files[0];
+        var reader = new FileReader();
+        reader.onload = function( progressEvent ){
+            // Entire file read as a string
 
-		switch(mode){
+            var mapString = this.result.replace(/ /g,'');
 
-			case 0 : primitiveType = gl.TRIANGLES;
-				break;
+            // test if given file only has ' ', '-' and '#'
+            if(/[^\#\r\n-]/.test(mapString)){
+                alert("Given map has invalid characters");
+                return;
+            }
 
-			case 1 : primitiveType = gl.LINE_LOOP;
-				break;
+            // map in array by lines
+            var mapStringArray = mapString.split(/\r\n|\r|\n/g);
 
-			case 2 : primitiveType = gl.POINTS;
-				break;
-		}
-	});
+            if(mapStringArray.length != 34){
+                alert("Given map has the wrong number of lines");
+                return;
+            }
+
+            // check that top and bottom lines are all #
+            if(!(/^[#]{33}/.test(mapStringArray[0]) && /^[#]{33}/.test(mapStringArray[32]))){
+                alert("Top and bottom lines need to be all walls and posts");
+                return;
+            }
+
+            // check if wall and post are valid
+            for(var i = 1; i <= 31; i+=2){
+                if(!/^#-([-#]-){15}#/.test(mapStringArray[i])){
+                    alert("Invalid wall or post in line " + (i+1));
+                    return;
+                }
+            }
+            for(var i = 2; i <= 30; i+=2){
+                if(!/^#([-#]#){16}/.test(mapStringArray[i])){
+                    alert("Invalid wall or post in line " + (i+1));
+                    return;
+                }
+            }
+        };
+
+        // Entire file read as a string
+        reader.readAsText( file );
+    }
 
 	document.getElementById("reset-button").onclick = function(){
 
@@ -608,10 +645,11 @@ function setEventListeners( canvas ){
 // Load Map
 //
 
-function loadMapData(){
+function loadMapData(file){
 
 	// http://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
 	var file = this.files[0];
+    console.log(file);
 	var reader = new FileReader();
 	reader.onload = function( progressEvent ){
 		// Entire file read as a string
