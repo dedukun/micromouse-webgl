@@ -21,9 +21,8 @@ var cubeVertexColorBuffer = null;
 var cubeVertexIndexBuffer = null;
 
 // The GLOBAL transformation parameters
-var globalAngleXX = 0.0;
+var globalAngleXX = 25.0;
 var globalAngleYY = 0.0;
-var globalTz = 0.0;
 var globalSz = 1;
 var globalSy = 1;
 var globalSx = 1;
@@ -55,8 +54,21 @@ var simVars = null;
 // MicroMouse variables
 
 var walls = null;
-
 var visited = null;
+
+var halfThicknessOfPost = 1.2/288;
+
+// lateral of floor minus post offsets
+var lateral = 2-2*halfThicknessOfPost;
+
+// center post on edge
+var postOffset = -1+halfThicknessOfPost;
+
+// place 1st wall after post
+var wallOffset = -1+2*halfThicknessOfPost;
+
+// half the wall, ~0.116
+var halfWallLateral = (2-17*2*halfThicknessOfPost)/32;
 
 // And their colour
 
@@ -274,11 +286,8 @@ function drawScene() {
 	// Passing the viewer position to the vertex shader
     gl.uniform4fv( gl.getUniformLocation(shaderProgram, "viewerPosition"), flatten(pos_Viewer) );
 
-	// Global transformation
-	globalTz = -2.5;
-
 	// GLOBAL TRANSFORMATION FOR THE WHOLE SCENE
-	mvMatrix = translationMatrix(0, 0, globalTz );
+	mvMatrix = translationMatrix(0, -0.3, -3.5 );
 	mvMatrix = mult( mvMatrix, rotationYYMatrix( globalAngleYY ) );
 	mvMatrix = mult( mvMatrix, rotationXXMatrix( globalAngleXX ) );
 	mvMatrix = mult( mvMatrix, scalingMatrix( globalSx, globalSy, globalSz ) );
@@ -287,7 +296,7 @@ function drawScene() {
 
     // Drawing Objects
     drawEmptyMap(mvMatrix);
-    drawMap(mvMatrix);
+    drawWalls(mvMatrix);
     drawMouse(mvMatrix);
     drawMarkers(mvMatrix);
 
@@ -297,8 +306,7 @@ function drawScene() {
 
 //----------------------------------------------------------------------------
 
-// Drawing the empty Map
-
+// Drawing the empty Map (floor and posts)
 function drawEmptyMap(mvMatrix){
 
 	// Drawing the floor
@@ -312,27 +320,13 @@ function drawEmptyMap(mvMatrix){
 
     /////////////////////////////////////////////////////////
 
-	var halfThicknessOfPost = 1.2/288;
-
-	// lateral of floor minus post offsets
-	var lateral = 2-2*halfThicknessOfPost;
-
-	// center post on edge
-	var postOffset = -1+halfThicknessOfPost
-
-	// place 1st wall after post
-	var wallOffset = -1+2*halfThicknessOfPost
-
-	// half the wall, ~0.116
-	var halfWallLateral = (2-17*2*halfThicknessOfPost)/32
-
 	// drawing posts
 	initBuffers(simVars['post']);
 	var x;
 	var z;
 	for(var i=0; i<=16; i++)
 		for(var j=0; j<=16; j++){
-							// each of 16 segments
+		    // each of 16 segments
 			x = postOffset + lateral/16 * i;
 			z = postOffset + lateral/16 * j;
 			drawModel(null, null, null,
@@ -340,42 +334,43 @@ function drawEmptyMap(mvMatrix){
 					mvMatrix,
 					primitiveType );
 	}
-
-	// drawing border walls
-	initBuffers(simVars['wall']);
-	var x;
-	for(var i=0 ; i<16; i++){
-		//	one post offset 				 each of 16 segments
-		x = wallOffset + halfWallLateral + lateral/16 * i;
-		// front wall
-		drawModel(null, null, null,
-				x, 0, -postOffset,
-				mvMatrix,
-				primitiveType );
-		// back wall
-		drawModel(null, 180, null,
-				x, 0, postOffset,
-				mvMatrix,
-				primitiveType );
-	}
-	var z;
-	for(var i=0 ; i<16; i++){
-		//	one post offset					 each of 16 segments
-		z = wallOffset + halfWallLateral + lateral/16 * i;
-		// right wall
-		drawModel(null, 90, null,
-				-postOffset, 0, z,
-				mvMatrix,
-				primitiveType );
-		// left wall
-		drawModel(null, 270, null,
-				postOffset, 0, z,
-				mvMatrix,
-				primitiveType );
-	}
 }
 
-function drawMap(mvMatrix){}
+function drawWalls(mvMatrix){
+
+	// drawing horizontal walls
+	initBuffers(simVars['wall']);
+	for(var row = 0; row < simVars['wall']['hor'].length; row++){
+        for(var col = 0; col < simVars['wall']['hor'][row].length; col++){
+            if(simVars['wall']['hor'][row][col]){
+                //	one post offset 				 each of 16 segments
+                var x = wallOffset + halfWallLateral + lateral/16 * col;
+                var z = postOffset + lateral/16 * row;
+                // front wall
+                drawModel(null, null, null,
+                        x, 0, z,
+                        mvMatrix,
+                        primitiveType );
+            }
+        }
+	}
+    // drawing vertical walls
+	for(var row = 0; row < simVars['wall']['ver'].length; row++){
+        for(var col = 0; col < simVars['wall']['ver'][row].length; col++){
+            if(simVars['wall']['ver'][row][col]){
+                //	one post offset					 each of 16 segments
+                var x = postOffset + lateral/16 * col
+                var z = wallOffset + halfWallLateral + lateral/16 * row;
+                // right wall
+                drawModel(null, 90, null,
+                        x, 0, z,
+                        mvMatrix,
+                        primitiveType );
+            }
+        }
+	}
+
+}
 
 function drawMouse(mvMatrix){
     // Drawing the mouse
@@ -603,7 +598,6 @@ function setEventListeners( canvas ){
                 simVars['wall']['hor'][line/2] = tmpWalls;
             }
 
-            console.log(simVars['wall']['hor']);
             // Vertical walls
             for(var line = 0; line < 32; line+=2){
                 var tmpWalls = [];
@@ -613,10 +607,6 @@ function setEventListeners( canvas ){
 
                 simVars['wall']['ver'][line/2] = tmpWalls;
             }
-
-            console.log(simVars['wall']['ver']);
-
-
         };
 
         // Entire file read as a string
