@@ -186,7 +186,6 @@ function countFrames() {
 function initBuffers(model) {
 
 	// Coordinates
-
 	cubeVertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['vertices']), gl.STATIC_DRAW);
@@ -194,15 +193,22 @@ function initBuffers(model) {
 	cubeVertexPositionBuffer.numItems = model['vertices'].length / 3;
 
 	// Colors
-
-	cubeVertexColorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-	cubeVertexColorBuffer.itemSize = 3;
-	cubeVertexColorBuffer.numItems = model['vertices'].length / 3;
+    if('colors' in model){
+        cubeVertexColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['colors']), gl.STATIC_DRAW);
+        cubeVertexColorBuffer.itemSize = 3;
+        cubeVertexColorBuffer.numItems = model['vertices'].length / 3;
+    }
+    else{ // REMOVE
+        cubeVertexColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+        cubeVertexColorBuffer.itemSize = 3;
+        cubeVertexColorBuffer.numItems = model['vertices'].length / 3;
+    }
 
 	// Vertex indices
-
     cubeVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model['faces']), gl.STATIC_DRAW);
@@ -439,14 +445,14 @@ var currentlyPressedKeys = {};
 
 function handleKeys() {
 
-	// Page Up
-	if (currentlyPressedKeys[33]) {
+	// -
+	if (currentlyPressedKeys[109]) {
 		//Zoom out
 		globalSx *= 0.9;
 		globalSz = globalSy = globalSx;
 	}
-	// Page Down
-	if (currentlyPressedKeys[34]) {
+	// +
+	if (currentlyPressedKeys[107]) {
 		//Zoom in
 		globalSx *= 1.1;
 		globalSz = globalSy = globalSx;
@@ -552,61 +558,14 @@ function setEventListeners( canvas ){
         reader.onload = function( progressEvent ){
             // Entire file read as a string
 
-            var mapString = this.result.replace(/ /g,'');
-
             // test if given file only has ' ', '-' and '#'
-            if(/[^\#\r\n-]/.test(mapString)){
+            if(/^[\#\s-]+$/.test(this.result))
+               loadMapDataA(this.result);
+            // test if given file only has ' ', '|' and '_'
+            else if(/^[|_\s]+$/.test(this.result))
+               loadMapDataB(this.result);
+            else
                 alert("Given map has invalid characters");
-                return;
-            }
-
-            // map in array by lines
-            var mapStringArray = mapString.split(/\r\n|\r|\n/g);
-
-            if(mapStringArray.length != 34){
-                alert("Given map has the wrong number of lines");
-                return;
-            }
-
-            // check that top and bottom lines are all #
-            if(!(/^[#]{33}/.test(mapStringArray[0]) && /^[#]{33}/.test(mapStringArray[32]))){
-                alert("Top and bottom lines need to be all walls and posts");
-                return;
-            }
-
-            // check if wall and post are valid
-            for(var i = 1; i <= 31; i+=2){
-                if(!/^#-([-#]-){15}#/.test(mapStringArray[i])){
-                    alert("Invalid wall or post in line " + (i+1));
-                    return;
-                }
-            }
-            for(var i = 2; i <= 30; i+=2){
-                if(!/^#([-#]#){16}/.test(mapStringArray[i])){
-                    alert("Invalid wall or post in line " + (i+1));
-                    return;
-                }
-            }
-
-            // Horizontal walls
-            for(var line = 0; line < 33; line+=2){
-                var tmpWalls = [];
-                for(var x = 0; x < 31; x+=2){
-                    tmpWalls[x/2] = (mapStringArray[line][x+1] == '#') | 0;
-                }
-
-                simVars['wall']['hor'][line/2] = tmpWalls;
-            }
-
-            // Vertical walls
-            for(var line = 0; line < 32; line+=2){
-                var tmpWalls = [];
-                for(var x = 0; x < 33; x+=2){
-                    tmpWalls[x/2] = (mapStringArray[line+1][x] == '#') | 0;
-                }
-
-                simVars['wall']['ver'][line/2] = tmpWalls;
-            }
         };
 
         // Entire file read as a string
@@ -660,61 +619,123 @@ function setEventListeners( canvas ){
 // Load Map
 //
 
-function loadMapData(file){
+function loadMapDataA(file){
 
-	// http://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
-	var file = this.files[0];
-    console.log(file);
-	var reader = new FileReader();
-	reader.onload = function( progressEvent ){
-		// Entire file read as a string
-		// The tokens/values in the file
+    var mapString = file.replace(/ /g,'');
 
-		// Separation between values is 1 or mode whitespaces
-		var tokens = this.result.split(/\s\s*/);
+    // map in array by lines
+    var mapStringArray = mapString.split(/\r\n|\r|\n/g);
 
-		// Array of values; each value is a string
-		var numVertices = parseInt( tokens[0] );
+    // ----------
+    // Validation
 
-		// For every vertex we have 3 floating point values
-		var i, j;
-		var aux = 1;
-		var newVertices = [];
+    if(mapStringArray.length != 34){
+        alert("Given map has the wrong number of lines");
+        return;
+    }
 
-		for( i = 0; i < numVertices; i++ ) {
-			for( j = 0; j < 3; j++ ) {
-				newVertices[ 3 * i + j ] = parseFloat( tokens[ aux++ ] );
-			}
-		}
-		// Assigning to the current model
-		vertices = newVertices.slice();
+    // check that top and bottom lines are all #
+    if(!(/^[#]{33}/.test(mapStringArray[0]) && /^[#]{33}/.test(mapStringArray[32]))){
+        alert("Top and bottom lines need to be all walls and posts");
+        return;
+    }
 
-		//Computing the triangle normal vector for every vertex
-		computeVertexNormals( vertices, normals );
+    // check if wall and post are valid
+    for(var i = 1; i <= 31; i+=2){
+        if(!/^#-([-#]-){15}#/.test(mapStringArray[i])){
+            alert("Invalid wall or post in line " + (i+1));
+            return;
+        }
+    }
+    for(var i = 2; i <= 30; i+=2){
+        if(!/^#([-#]#){16}/.test(mapStringArray[i])){
+            alert("Invalid wall or post in line " + (i+1));
+            return;
+        }
+    }
 
-		// To render the model just read
-		//initBuffers();
+    // ------------------------------------------
+    // Loading walls and post position to simVars
 
-		// Reset the transformations
-		tx = ty = tz = 0.0;
-		angleXX = angleYY = angleZZ = 0.0;
-		sx = sy = sz = 1;
-	};
+    // Horizontal walls
+    for(var line = 0; line < 33; line+=2){
+        var tmpWalls = [];
+        for(var x = 0; x < 31; x+=2){
+            tmpWalls[x/2] = (mapStringArray[line][x+1] == '#') | 0;
+        }
 
-	// Entire file read as a string
-	reader.readAsText( file );
+        simVars['wall']['hor'][line/2] = tmpWalls;
+    }
+
+    // Vertical walls
+    for(var line = 0; line < 32; line+=2){
+        var tmpWalls = [];
+        for(var x = 0; x < 33; x+=2){
+            tmpWalls[x/2] = (mapStringArray[line+1][x] == '#') | 0;
+        }
+
+        simVars['wall']['ver'][line/2] = tmpWalls;
+    }
 }
 
-function loadMap(filename){
-    //https://dannywoodz.wordpress.com/2014/12/16/webgl-from-scratch-loading-a-mesh/
-    $.ajax({
-        url: filename,
-        dataType: 'text'
-      }).done(function(data) {
-        loadMapData(data);
-      }).fail(function() {
-        alert('Faild to retrieve [' + filename + "]");
-      });
+function loadMapDataB(file){
+
+    // removes whitespaces at the end of the lines
+    var mapString = file.replace(/\s+$/g,'');
+
+     // map in array by lines
+    var mapStringArray = mapString.split(/\r\n|\r|\n/g);
+
+    // ----------
+    // Validation
+
+    if(mapStringArray.length != 17){
+        alert("Given map has the wrong number of lines");
+        return;
+    }
+
+    // Check top line
+    if(!(/^(\s_){16}$/.test(mapStringArray[0]))){
+        alert("The top line needs to be all walls");
+        return;
+    }
+
+    // check middle lines
+    for(var i = 1; i < 16; i++){
+        if(!(/^\|([_\s][|\s]){15}[_\s]\|$/).test(mapStringArray[i])){
+            alert("Invalid wall at line " + (i+1));
+            return;
+        }
+    }
+
+    // check bottom line
+    if(!(/^\|(_[|\s]){15}[_\s]\|$/.test(mapStringArray[16]))){
+        alert("The botton line is invalid");
+        return;
+    }
+
+    // ------------------------------------------
+    // Loading walls and post position to simVars
+
+    // Horizontal walls
+    for(var line = 0; line < 17; line++){
+        var tmpWalls = [];
+        for(var x = 0; x < 32; x+=2){
+            tmpWalls[x/2] = (mapStringArray[line][x+1] == '_') | 0;
+        }
+
+        simVars['wall']['hor'][line] = tmpWalls;
+    }
+
+    // Vertical walls
+    for(var line = 0; line < 16; line++){
+        var tmpWalls = [];
+        for(var x = 0; x < 33; x+=2){
+            tmpWalls[x/2] = (mapStringArray[line+1][x] == '|') | 0;
+        }
+
+        simVars['wall']['ver'][line] = tmpWalls;
+    }
 }
 
 //----------------------------------------------------------------------------
