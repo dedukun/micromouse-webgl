@@ -252,7 +252,7 @@ function moveToSphericalSurface( coordsArray ) {
 
 //----------------------------------------------------------------------------
 //
-//  NEW --- Computing the triangle unit normal vector
+//  Computing the triangle unit normal vector
 //
 //  And associating to every vertex
 //

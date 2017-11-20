@@ -6,15 +6,7 @@
 
 <!--
 
-WebGL_example_24_GPU_per_vertex.html
-
-Phong Illumination Model on the GPU - Per vertex shading - Several light sources
-
-J. Madeira - November 2017
-
-Reference for handling multiple light sources:
-
-https://www.tomdalling.com/blog/modern-opengl/08-even-more-lighting-directional-lights-spotlights-multiple-lights/
+Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 
 -->
 
@@ -25,8 +17,6 @@ https://www.tomdalling.com/blog/modern-opengl/08-even-more-lighting-directional-
 <!--
 
 The vertex and fragment shaders.
-
-NEW VERTEX SHADER!
 
 The fragment shader is the same simple one.
 
@@ -102,8 +92,7 @@ The fragment shader is the same simple one.
 
         //vec3 pos = (uMVMatrix * vec4(vPosition, 1.0)).xyz;
 
-
-		// NEW - ITERATING THROUGH ALL LIGHT SOURCES
+		// ITERATING THROUGH ALL LIGHT SOURCES
 
 		fColor = vec4(0.0, 0.0, 0.0, 0.0);	// To add all illumination components
 

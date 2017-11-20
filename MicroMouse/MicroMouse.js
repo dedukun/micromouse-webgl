@@ -256,7 +256,7 @@ function drawModel( angleXX, angleYY, angleZZ,
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
 
-	// Drawing the triangles --- NEW --- DRAWING ELEMENTS
+	// Drawing the triangles
 
 	gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }

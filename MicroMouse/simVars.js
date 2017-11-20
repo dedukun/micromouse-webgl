@@ -1,3 +1,9 @@
+//////////////////////////////////////////////////////////////////
+//                                                              //
+//  Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017    //
+//                                                              //
+//////////////////////////////////////////////////////////////////
+
 // Returns dictionary with all models and variables used in the app
 function getSimulationVars(){
     return {
