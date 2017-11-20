@@ -17,8 +17,8 @@ var shaderProgram = null;
 
 // Buffers
 var cubeVertexPositionBuffer = null;
-var cubeVertexColorBuffer = null;
 var cubeVertexIndexBuffer = null;
+var cubeVertexTextureCoordBuffer;
 
 // The GLOBAL transformation parameters
 var globalAngleXX = 25.0;
@@ -70,75 +70,44 @@ var wallOffset = -1+2*halfThicknessOfPost;
 // half the wall, ~0.116
 var halfWallLateral = (2-17*2*halfThicknessOfPost)/32;
 
-// And their colour
+// Texture
+var textureCoords = [
+          // Front face
+          0.0, 0.0,
+          1.0, 0.0,
+          1.0, 1.0,
+          0.0, 1.0,
 
-var colors = [
+          // Back face
+          1.0, 0.0,
+          1.0, 1.0,
+          0.0, 1.0,
+          0.0, 0.0,
 
-		 // FRONT FACE - RED
+          // Top face
+          0.0, 1.0,
+          0.0, 0.0,
+          1.0, 0.0,
+          1.0, 1.0,
 
-		 1.00,  0.00,  0.00,
+          // Bottom face
+          1.0, 1.0,
+          0.0, 1.0,
+          0.0, 0.0,
+          1.0, 0.0,
 
-		 1.00,  0.00,  0.00,
+          // Right face
+          1.0, 0.0,
+          1.0, 1.0,
+          0.0, 1.0,
+          0.0, 0.0,
 
-		 1.00,  0.00,  0.00,
-
-		 1.00,  0.00,  0.00,
-
-		 // BACK FACE - BLACK
-
-		 0.00,  0.00,  0.00,
-
-		 0.00,  0.00,  0.00,
-
-		 0.00,  0.00,  0.00,
-
-		 0.00,  0.00,  0.00,
-
-		 // TOP FACE -
-
-		 1.00,  1.00,  0.00,
-
-		 1.00,  1.00,  0.00,
-
-		 1.00,  1.00,  0.00,
-
-		 1.00,  1.00,  0.00,
-
-
-		 // BOTTOM FACE
-
-		 0.00,  1.00,  1.00,
-
-		 0.00,  1.00,  1.00,
-
-		 0.00,  1.00,  1.00,
-
-		 0.00,  1.00,  1.00,
-
-
-		 // RIGHT FACE - BLUE
-
-		 0.00,  0.00,  1.00,
-
-		 0.00,  0.00,  1.00,
-
-		 0.00,  0.00,  1.00,
-
-		 0.00,  0.00,  1.00,
-
-
-		 // LEFT FACE - GREEN
-
-		 0.00,  1.00,  0.00,
-
-		 0.00,  1.00,  0.00,
-
-		 0.00,  1.00,  0.00,
-
-		 0.00,  1.00,  0.00,
+          // Left face
+          0.0, 0.0,
+          1.0, 0.0,
+          1.0, 1.0,
+          0.0, 1.0,
 ];
-
-
 
 //----------------------------------------------------------------------------
 //
@@ -181,6 +150,88 @@ function countFrames() {
 //  Rendering
 //
 
+// Handling the Textures
+// From www.learningwebgl.com
+
+function handleLoadedTexture(texture, repeatTexture = false) {
+
+    if(!repeatTexture){
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+    else{
+
+    }
+}
+
+
+// Textures variables
+var floorTexture;
+var wallTopTexture;
+var wallSideTexture;
+var postTopTexture;
+var postSideTexture;
+var mouseTopTexture;
+var mouseSideTexture;
+
+function initTexture() {
+
+	floorTexture = gl.createTexture();
+	floorTexture.image = new Image();
+	floorTexture.image.onload = function () {
+		handleLoadedTexture(floorTexture)
+	}
+
+	wallTopTexture = gl.createTexture();
+	wallTopTexture.image = new Image();
+	wallTopTexture.image.onload = function () {
+		handleLoadedTexture(wallTopTexture)
+	}
+
+	wallSideTexture = gl.createTexture();
+	wallSideTexture.image = new Image();
+	wallSideTexture.image.onload = function () {
+		handleLoadedTexture(wallSideTexture)
+	}
+
+	postTopTexture = gl.createTexture();
+	postTopTexture.image = new Image();
+	postTopTexture.image.onload = function () {
+		handleLoadedTexture(postTopTexture)
+	}
+
+	postSideTexture = gl.createTexture();
+	postSideTexture.image = new Image();
+	postSideTexture.image.onload = function () {
+		handleLoadedTexture(postSideTexture)
+	}
+
+	mouseTopTexture = gl.createTexture();
+	mouseTopTexture.image = new Image();
+	mouseTopTexture.image.onload = function () {
+		handleLoadedTexture(mouseTopTexture)
+	}
+
+	mouseSideTexture = gl.createTexture();
+	mouseSideTexture.image = new Image();
+	mouseSideTexture.image.onload = function () {
+		handleLoadedTexture(mouseSideTexture)
+	}
+
+
+	floorTexture.image.src     = simVars['floor'].texture;
+	wallTopTexture.image.src   = simVars['wall'].textureTop;
+	wallSideTexture.image.src  = simVars['wall'].textureSide;
+	postTopTexture.image.src   = simVars['post'].textureTop;
+	postSideTexture.image.src  = simVars['post'].textureSide;
+	mouseTopTexture.image.src  = simVars['mouse'].textureTop;
+	mouseSideTexture.image.src = simVars['mouse'].textureSide;
+}
+
 // Handling the Vertex and the Color Buffers
 
 function initBuffers(model) {
@@ -192,21 +243,12 @@ function initBuffers(model) {
 	cubeVertexPositionBuffer.itemSize = 3;
 	cubeVertexPositionBuffer.numItems = model['vertices'].length / 3;
 
-	// Colors
-    if('colors' in model){
-        cubeVertexColorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['colors']), gl.STATIC_DRAW);
-        cubeVertexColorBuffer.itemSize = 3;
-        cubeVertexColorBuffer.numItems = model['vertices'].length / 3;
-    }
-    else{ // REMOVE
-        cubeVertexColorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-        cubeVertexColorBuffer.itemSize = 3;
-        cubeVertexColorBuffer.numItems = model['vertices'].length / 3;
-    }
+    // Textures
+    cubeVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
+    cubeVertexTextureCoordBuffer.itemSize = 2;
+    cubeVertexTextureCoordBuffer.numItems = 24;
 
 	// Vertex indices
     cubeVertexIndexBuffer = gl.createBuffer();
@@ -223,7 +265,10 @@ function initBuffers(model) {
 function drawModel( angleXX, angleYY, angleZZ,
 					tx, ty, tz,
 					mvMatrix,
-					primitiveType ) {
+					primitiveType,
+                    dualTextureMode,
+                    modelTexture,
+                    modelTexture2 = null) {
 
     // Pay attention to transformation order !!
     if(tx != null)
@@ -245,20 +290,36 @@ function drawModel( angleXX, angleYY, angleZZ,
 	gl.uniformMatrix4fv(mvUniform, false, new Float32Array(flatten(mvMatrix)));
 
     // Passing the buffers
-
 	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
 
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    // Textures
+    gl.activeTexture(gl.TEXTURE0);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
 
+
+    if(!dualTextureMode){
+        gl.bindTexture(gl.TEXTURE_2D, modelTexture);
+        // Drawing the triangles --- NEW --- DRAWING ELEMENTS
+        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    }
+    else{
+        // Not Drawing the bottom
+
+        // Side Textures
+        gl.bindTexture(gl.TEXTURE_2D, modelTexture);
+        gl.drawElements(gl.TRIANGLES, 24, gl.UNSIGNED_SHORT, 0);
+
+        // Top Texture
+        gl.bindTexture(gl.TEXTURE_2D, modelTexture2);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 48);
+    }
+    // The vertex indices
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-
-	// Drawing the triangles
-
-	gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 //----------------------------------------------------------------------------
@@ -314,7 +375,6 @@ function drawScene() {
 
 // Drawing the empty Map (floor and posts)
 function drawEmptyMap(mvMatrix){
-
 	// Drawing the floor
 	initBuffers(simVars['floor']);
 
@@ -322,10 +382,11 @@ function drawEmptyMap(mvMatrix){
 	drawModel( null, null, null,
 			 null, null, null,
 			 mvMatrix,
-			 primitiveType );
+			 primitiveType,
+             false,
+             floorTexture);
 
     /////////////////////////////////////////////////////////
-
 	// drawing posts
 	initBuffers(simVars['post']);
 	var x;
@@ -338,7 +399,10 @@ function drawEmptyMap(mvMatrix){
 			drawModel(null, null, null,
 					x, 0, z,
 					mvMatrix,
-					primitiveType );
+					primitiveType,
+                    true,
+                    postSideTexture,
+                    postTopTexture);
 	}
 }
 
@@ -356,7 +420,10 @@ function drawWalls(mvMatrix){
                 drawModel(null, null, null,
                         x, 0, z,
                         mvMatrix,
-                        primitiveType );
+                        primitiveType,
+                        true,
+                        wallSideTexture,
+                        wallTopTexture);
             }
         }
 	}
@@ -371,7 +438,10 @@ function drawWalls(mvMatrix){
                 drawModel(null, 90, null,
                         x, 0, z,
                         mvMatrix,
-                        primitiveType );
+                        primitiveType,
+                        true,
+                        wallSideTexture,
+                        wallTopTexture);
             }
         }
 	}
@@ -386,7 +456,10 @@ function drawMouse(mvMatrix){
 	drawModel( null, simVars['mouse'].angleYY, null,
 	           simVars['mouse'].tx, 0, simVars['mouse'].tz,
 	           mvMatrix,
-	           primitiveType );
+	           primitiveType,
+               true,
+               mouseSideTexture,
+               mouseTopTexture);
 }
 
 function drawMarkers(mvMatrix){}
@@ -788,6 +861,8 @@ function runWebGL() {
 	setEventListeners( canvas );
 
     simVars = getSimulationVars(); // Get models and variables used
+
+    initTexture();
 
 	//initBuffers();
 
