@@ -70,6 +70,14 @@ var wallOffset = -1+2*halfThicknessOfPost;
 // half the wall, ~0.116
 var halfWallLateral = (2-17*2*halfThicknessOfPost)/32;
 
+// colition aux vars
+var coorDict = {};
+    //change this to local
+var matrix2D = [];
+
+var col = null;
+var row = null;
+
 //----------------------------------------------------------------------------
 //
 // Count the number of frames per second (fps)
@@ -363,15 +371,29 @@ function drawEmptyMap(mvMatrix){
 
 function drawWalls(mvMatrix){
 
-	// drawing horizontal walls
-	initBuffers(simVars['wall']);
-	for(var row = 0; row < simVars['wall']['hor'].length; row++){
-        for(var col = 0; col < simVars['wall']['hor'][row].length; col++){
-            if(simVars['wall']['hor'][row][col]){
-                //	one post offset 				 each of 16 segments
-                var x = wallOffset + halfWallLateral + lateral/16 * col;
-                var z = postOffset + lateral/16 * row;
-                // front wall
+    matrix2D = []
+    row = Math.floor((simVars['mouse'].tz+1)/(2/16));
+    col = Math.floor((simVars['mouse'].tx+1)/(2/16));
+
+    // drawing horizontal walls
+    initBuffers(simVars['wall']);
+    for(var iRow = 0; iRow < simVars['wall']['hor'].length; iRow++){
+        for(var iCol = 0; iCol < simVars['wall']['hor'][iRow].length; iCol++){
+            if(simVars['wall']['hor'][iRow][iCol]){
+                //  one post offset                  each of 16 segments
+                var x = wallOffset + halfWallLateral + lateral/16 * iCol;
+                var z = postOffset + lateral/16 * iRow;
+
+                if((iRow == row) && (iCol == col)) {
+                    // save the coords around for use
+                    matrix2D[0] = [x - 0.058, z + 0.004, x + 0.058, z + 0.004, x + 0.058, z - 0.004, x - 0.058, z - 0.004 ];
+                }
+
+                if((iRow == row+1) && (iCol == col)) {
+                    // save the coords around for use
+                    matrix2D[1] = [x - 0.058, z + 0.004, x + 0.058, z + 0.004, x + 0.058, z - 0.004, x - 0.058, z - 0.004 ];
+                }
+                    // draw
                 drawModel(null, null, null,
                         x, 0, z,
                         mvMatrix,
@@ -380,16 +402,29 @@ function drawWalls(mvMatrix){
                         wallSideTexture,
                         wallTopTexture);
             }
+            else{
+                if((iRow == row) && (iCol == col)) {
+                    // save the coords for colition use
+                    matrix2D[0] = 10;
+                }
+                if((iRow == row+1) && (iCol == col)) {
+                    matrix2D[1] = 10;
+                }
+            }
         }
-	}
+    }
+
     // drawing vertical walls
-	for(var row = 0; row < simVars['wall']['ver'].length; row++){
-        for(var col = 0; col < simVars['wall']['ver'][row].length; col++){
-            if(simVars['wall']['ver'][row][col]){
-                //	one post offset					 each of 16 segments
-                var x = postOffset + lateral/16 * col
-                var z = wallOffset + halfWallLateral + lateral/16 * row;
-                // right wall
+    for(var iRow = 0; iRow < simVars['wall']['ver'].length; iRow++){
+        for(var iCol = 0; iCol < simVars['wall']['ver'][iRow].length; iCol++){
+            if(simVars['wall']['ver'][iRow][iCol]){
+                //  one post offset                  each of 16 segments
+                var x = postOffset + lateral/16 * iCol
+                var z = wallOffset + halfWallLateral + lateral/16 * iRow;
+
+                //save the coords for colition use
+
+
                 drawModel(null, 90, null,
                         x, 0, z,
                         mvMatrix,
@@ -399,19 +434,18 @@ function drawWalls(mvMatrix){
                         wallTopTexture);
             }
         }
-	}
-
+    }
 }
 
 function drawMouse(mvMatrix){
     // Drawing the mouse
     initBuffers(simVars['mouse']);
 
-	// Instantianting the current model
-	drawModel( null, simVars['mouse'].angleYY, null,
-	           simVars['mouse'].tx, 0, simVars['mouse'].tz,
-	           mvMatrix,
-	           primitiveType,
+    // Instantianting the current model
+    drawModel( null, simVars['mouse'].angleYY, null,
+               simVars['mouse'].tx, 0, simVars['mouse'].tz,
+               mvMatrix,
+               primitiveType,
                true,
                mouseSideTexture,
                mouseTopTexture);
@@ -420,20 +454,77 @@ function drawMouse(mvMatrix){
 function drawMarkers(mvMatrix){}
 
 
+
+//----------------------------------------------------------------------------
+
+//  Colition detection
+
+function detectColition(x, z, angY, dir, key){
+    if(x == null) x = simVars['mouse'].tx;
+    if(z == null) z = simVars['mouse'].tz;
+    if(angY == null) angY = simVars['mouse'].angleYY;
+
+    if(dir=="up" && key=="w" || dir=="down" && key=="s") {
+        if(matrix2D[0] == 10) return false;
+    }
+    if(dir=="down" && key=="w" || dir=="up" && key=="s") {
+        if(matrix2D[1] == 10) return false;
+    }
+
+    if (key == "w"){ //front face 2 corners
+        x1 = x - 0.042 * Math.cos(radians(angY)); 
+        z1 = z - 0.028 * Math.sin(radians(angY)); 
+        x2 = x + 0.042 * Math.cos(radians(angY)); 
+        z2 = z - 0.028 * Math.sin(radians(angY)); 
+    }
+    else{            //back face 2 corners
+        x1 = x - 0.042 * Math.cos(radians(angY)); 
+        z1 = z + 0.028 * Math.sin(radians(angY));
+        x2 = x + 0.042 * Math.cos(radians(angY));
+        z2 = z + 0.028 * Math.sin(radians(angY));
+    }
+
+    if(dir=="up" && key=="w" || dir=="down" && key=="s") {
+        if (
+            //
+            ((x1 >= matrix2D[0][0] &&  z1 <= matrix2D[0][1])&&
+             (x1 <= matrix2D[0][2] &&  z1 <= matrix2D[0][3]))||
+            //
+            ((x2 >= matrix2D[0][0] &&  z2 <= matrix2D[0][1])&&
+             (x2 <= matrix2D[0][2] &&  z2 <= matrix2D[0][3]))
+           ) {
+                return true;
+        }
+    }
+    else if(dir=="down" && key=="w" || dir=="up" && key=="s") {
+        if (
+            //
+            ((x1 >= matrix2D[1][0] &&  z1 >= matrix2D[1][1])&&
+             (x1 <= matrix2D[1][2] &&  z1 >= matrix2D[1][3]))||
+            //
+            ((x2 >= matrix2D[1][0] &&  z2 >= matrix2D[1][1])&&
+             (x2 <= matrix2D[1][2] &&  z2 >= matrix2D[1][3]))
+           ) {
+                return true;
+        }
+    }
+    return false;
+}
+
 //----------------------------------------------------------------------------
 
 // Timer
 
 function tick() {
 
-	requestAnimFrame(tick);
+    requestAnimFrame(tick);
 
-	resizeCanvas(gl.canvas);
-	gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
+    resizeCanvas(gl.canvas);
+    gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
 
     handleKeys();
 
-	drawScene();
+    drawScene();
 }
 
 
@@ -442,13 +533,13 @@ function tick() {
 // Resize Canvas
 
 function resizeCanvas(canvas) {
-	// Lookup the size the browser is displaying the canvas.
-	var displayWidth  = canvas.clientWidth;
-	var displayHeight = canvas.clientHeight;
+    // Lookup the size the browser is displaying the canvas.
+    var displayWidth  = canvas.clientWidth;
+    var displayHeight = canvas.clientHeight;
 
-	// Check if the canvas is not the same size.
-	if (canvas.width  != displayWidth ||
-	  canvas.height != displayHeight) {
+    // Check if the canvas is not the same size.
+    if (canvas.width  != displayWidth ||
+      canvas.height != displayHeight) {
 
     // Make the canvas the same size
     canvas.width  = displayWidth;
@@ -473,40 +564,70 @@ var currentlyPressedKeys = {};
 
 function handleKeys() {
 
-	// -
-	if (currentlyPressedKeys[109]) {
-		//Zoom out
-		globalSx *= 0.9;
-		globalSz = globalSy = globalSx;
-	}
-	// +
-	if (currentlyPressedKeys[107]) {
-		//Zoom in
-		globalSx *= 1.1;
-		globalSz = globalSy = globalSx;
-	}
-	// W or w
-	if (currentlyPressedKeys[87] || currentlyPressedKeys[119]) {
-		// go up
-		simVars['mouse'].tx += 0.0075 * Math.cos(simVars['mouse'].angleYY/180*Math.PI);
-		simVars['mouse'].tz -= 0.0075 * Math.sin(simVars['mouse'].angleYY/180*Math.PI);
-	}
-	// A or a
-	if (currentlyPressedKeys[65] || currentlyPressedKeys[97]) {
-		// go left
-		simVars['mouse'].angleYY += 2.0;
-	}
-	// S or s
-	if (currentlyPressedKeys[83] || currentlyPressedKeys[115]) {
-		// go down
-		simVars['mouse'].tx -= 0.0075 * Math.cos(simVars['mouse'].angleYY/180*Math.PI);
-		simVars['mouse'].tz += 0.0075 * Math.sin(simVars['mouse'].angleYY/180*Math.PI);
-	}
-	// D or d
-	if (currentlyPressedKeys[68] || currentlyPressedKeys[100]) {
-		// go right
-		simVars['mouse'].angleYY -= 2.0;
-	}
+    // -
+    if (currentlyPressedKeys[109]) {
+        //Zoom out
+        globalSx *= 0.9;
+        globalSz = globalSy = globalSx;
+    }
+    // +
+    if (currentlyPressedKeys[107]) {
+        //Zoom in
+        globalSx *= 1.1;
+        globalSz = globalSy = globalSx;
+    }
+    // W or w
+    if ((currentlyPressedKeys[87] || currentlyPressedKeys[119])){
+
+        var x = simVars['mouse'].tx + 0.0150 * Math.cos( radians(simVars['mouse'].angleYY) );
+        var z = simVars['mouse'].tz - 0.0150 * Math.sin( radians(simVars['mouse'].angleYY) );
+        var sector = Math.floor((simVars['mouse'].angleYY%360)/90);
+        if ( sector >= 0 && sector < 2 || sector < 0 && sector < -2 ) var dir = "up";
+        else var dir = "down"; 
+
+        if(!detectColition(x,z,null,dir,"w")){
+            // go up
+            simVars['mouse'].tx += 0.0075 * Math.cos( radians(simVars['mouse'].angleYY) );
+            simVars['mouse'].tz -= 0.0075 * Math.sin( radians(simVars['mouse'].angleYY) );
+        }
+
+    }
+    // A or a
+    if (currentlyPressedKeys[65] || currentlyPressedKeys[97]){
+        
+        //var angleY = simVars['mouse'].angleYY + 2.0;
+
+        //if(!detectColition(null,null,angleY,"up")&&!detectColition(null,null,angleY,"down")){
+            // go left
+            simVars['mouse'].angleYY += 2.0;
+        //}
+    }
+    // S or s
+    if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
+
+        var x = simVars['mouse'].tx - 0.0150 * Math.cos( radians(simVars['mouse'].angleYY) );
+        var z = simVars['mouse'].tz + 0.0150 * Math.sin( radians(simVars['mouse'].angleYY) );
+        var sector = Math.floor((simVars['mouse'].angleYY%360)/90);
+        if ( sector > 0 && sector < 2 || sector < 0 && sector < -2 ) var dir = "up";
+        else var dir = "down";  
+ 
+
+        if(!detectColition(x,z,null,dir,"s")){
+            // go down
+            simVars['mouse'].tx -= 0.0075 * Math.cos( radians(simVars['mouse'].angleYY) );
+            simVars['mouse'].tz += 0.0075 * Math.sin( radians(simVars['mouse'].angleYY) );
+        }
+    }
+    // D or d
+    if (currentlyPressedKeys[68] || currentlyPressedKeys[100]){
+        
+        //var angleY = simVars['mouse'].angleYY - 2.0;
+
+        //if(!detectColition(null,null,angleY,"up")&&!detectColition(null,null,angleY,"down")){
+            // go right
+            simVars['mouse'].angleYY -= 2.0;
+        //}
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -575,10 +696,10 @@ function setEventListeners( canvas ){
     function handleKeyUp(event) {
         currentlyPressedKeys[event.keyCode] = false;
     }
-	document.onkeydown = handleKeyDown;
+    document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
 
-	document.getElementById("file").onchange = function(){
+    document.getElementById("file").onchange = function(){
 
         // http://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
         var file = this.files[0];
@@ -600,46 +721,46 @@ function setEventListeners( canvas ){
         reader.readAsText( file );
     }
 
-	document.getElementById("reset-button").onclick = function(){
+    document.getElementById("reset-button").onclick = function(){
 
-		// The initial values
+        // The initial values
 
-		tx = 0.0;
+        tx = 0.0;
 
-		ty = 0.0;
+        ty = 0.0;
 
-		tz = 0.0;
+        tz = 0.0;
 
-		angleXX = 0.0;
+        angleXX = 0.0;
 
-		angleYY = 0.0;
+        angleYY = 0.0;
 
-		angleZZ = 0.0;
+        angleZZ = 0.0;
 
-		sx = 1;
+        sx = 1;
 
-		sy = 1;
+        sy = 1;
 
-		sz = 1;
+        sz = 1;
 
-		rotationXX_ON = 0;
+        rotationXX_ON = 0;
 
-		rotationXX_DIR = 1;
+        rotationXX_DIR = 1;
 
-		rotationXX_SPEED = 1;
+        rotationXX_SPEED = 1;
 
-		rotationYY_ON = 0;
+        rotationYY_ON = 0;
 
-		rotationYY_DIR = 1;
+        rotationYY_DIR = 1;
 
-		rotationYY_SPEED = 1;
+        rotationYY_SPEED = 1;
 
-		rotationZZ_ON = 0;
+        rotationZZ_ON = 0;
 
-		rotationZZ_DIR = 1;
+        rotationZZ_DIR = 1;
 
-		rotationZZ_SPEED = 1;
-	};
+        rotationZZ_SPEED = 1;
+    };
 }
 
 //----------------------------------------------------------------------------
@@ -772,56 +893,56 @@ function loadMapDataB(file){
 //
 
 function initWebGL( canvas ) {
-	try {
+    try {
 
-		// Create the WebGL context
-		gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        // Create the WebGL context
+        gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 
-		// DEFAULT: The viewport occupies the whole canvas
+        // DEFAULT: The viewport occupies the whole canvas
 
-		// DEFAULT: The viewport background color is WHITE
+        // DEFAULT: The viewport background color is WHITE
 
-		// Drawing the triangles defining the model
-		primitiveType = gl.TRIANGLES;
+        // Drawing the triangles defining the model
+        primitiveType = gl.TRIANGLES;
 
-		// DEFAULT: Face culling is DISABLED
+        // DEFAULT: Face culling is DISABLED
 
-		// Enable FACE CULLING
-		gl.enable( gl.CULL_FACE );
+        // Enable FACE CULLING
+        gl.enable( gl.CULL_FACE );
 
-		// DEFAULT: The BACK FACE is culled!
+        // DEFAULT: The BACK FACE is culled!
 
-		// Enable DEPTH-TEST
-		gl.enable( gl.DEPTH_TEST );
+        // Enable DEPTH-TEST
+        gl.enable( gl.DEPTH_TEST );
 
         //Load Map
 
-	} catch (e) {
-	}
-	if (!gl) {
-		alert("Could not initialise WebGL, sorry! :-(");
-	}
+    } catch (e) {
+    }
+    if (!gl) {
+        alert("Could not initialise WebGL, sorry! :-(");
+    }
 }
 
 //----------------------------------------------------------------------------
 
 function runWebGL() {
 
-	var canvas = document.getElementById("my-canvas");
+    var canvas = document.getElementById("my-canvas");
 
-	initWebGL( canvas );
+    initWebGL( canvas );
 
-	shaderProgram = initShaders( gl );
+    shaderProgram = initShaders( gl );
 
-	setEventListeners( canvas );
+    setEventListeners( canvas );
 
     simVars = getSimulationVars(); // Get models and variables used
 
     initTexture();
 
-	//initBuffers();
+    //initBuffers();
 
-	tick();		// Timer that controls the rendering / animation
+    tick();     // Timer that controls the rendering / animation
 
-	outputInfos();
+    outputInfos();
 }
