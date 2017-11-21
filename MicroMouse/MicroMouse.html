@@ -80,6 +80,9 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 
 <script type="text/javascript" src="simVars.js"></script>
 
+<!-- Simulation Logic -->
+<script type="text/javascript" src="Simulation.js"></script>
+
 <!-- jQuery Import (Used to import files) -->
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -96,6 +99,16 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 
 		<p id="fps"> fps: </p>
 
+        <p>Cameras:
+
+        <select id="camera-selection">
+			<option value="0">Free Camera</option>
+			<option value="1">Top View</option>
+			<option value="2">First Person View</option>
+        </select>
+
+        </p>
+
         <p>Read a new Map:
 
 		<input type="file" id="file" name="file">
@@ -104,7 +117,7 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 
         <p>
 
-		<button id="reset-button">Reset</button>
+		<button id="reset-button">Reset Map</button>
 
 		</p>
 
