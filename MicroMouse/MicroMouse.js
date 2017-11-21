@@ -23,9 +23,12 @@ var cubeVertexTextureCoordBuffer;
 // The GLOBAL transformation parameters
 var globalAngleXX = 25.0;
 var globalAngleYY = 0.0;
-var globalSz = 1;
-var globalSy = 1;
+var globalTx =  0.0;
+var globalTy = -0.3;
+var globalTz = -3.5;
 var globalSx = 1;
+var globalSy = 1;
+var globalSz = 1;
 
 // To allow choosing the way of drawing the model triangles
 var primitiveType = null;
@@ -33,7 +36,11 @@ var primitiveType = null;
 // The viewer position
 var pos_Viewer = [ 0.0, 0.0, 0.0, 1.0 ];
 
-// Model Material Features
+// First Person View Camera
+var firstPersonView = false;
+
+// Block User Mouse Inputs (Rotations)
+var blockMouseInput = false;
 
 // Ambient coef.
 var kAmbi = [ 0.2, 0.2, 0.2 ];
@@ -317,7 +324,7 @@ function drawScene() {
     gl.uniform4fv( gl.getUniformLocation(shaderProgram, "viewerPosition"), flatten(pos_Viewer) );
 
 	// GLOBAL TRANSFORMATION FOR THE WHOLE SCENE
-	mvMatrix = translationMatrix(0, -0.3, -3.5 );
+	mvMatrix = translationMatrix(globalTx, globalTy, globalTz );
 	mvMatrix = mult( mvMatrix, rotationYYMatrix( globalAngleYY ) );
 	mvMatrix = mult( mvMatrix, rotationXXMatrix( globalAngleXX ) );
 	mvMatrix = mult( mvMatrix, scalingMatrix( globalSx, globalSy, globalSz ) );
@@ -327,8 +334,10 @@ function drawScene() {
     // Drawing Objects
     drawEmptyMap(mvMatrix);
     drawWalls(mvMatrix);
-    drawMouse(mvMatrix);
     drawMarkers(mvMatrix);
+
+    //if(!firstPersonView)
+    drawMouse(mvMatrix);
 
 	// Counting the frames
 	countFrames();
@@ -472,13 +481,13 @@ function detectColition(x, z, angY, dir, key){
     }
 
     if (key == "w"){ //front face 2 corners
-        x1 = x - 0.042 * Math.cos(radians(angY)); 
-        z1 = z - 0.028 * Math.sin(radians(angY)); 
-        x2 = x + 0.042 * Math.cos(radians(angY)); 
-        z2 = z - 0.028 * Math.sin(radians(angY)); 
+        x1 = x - 0.042 * Math.cos(radians(angY));
+        z1 = z - 0.028 * Math.sin(radians(angY));
+        x2 = x + 0.042 * Math.cos(radians(angY));
+        z2 = z - 0.028 * Math.sin(radians(angY));
     }
     else{            //back face 2 corners
-        x1 = x - 0.042 * Math.cos(radians(angY)); 
+        x1 = x - 0.042 * Math.cos(radians(angY));
         z1 = z + 0.028 * Math.sin(radians(angY));
         x2 = x + 0.042 * Math.cos(radians(angY));
         z2 = z + 0.028 * Math.sin(radians(angY));
@@ -583,7 +592,7 @@ function handleKeys() {
         var z = simVars['mouse'].tz - 0.0150 * Math.sin( radians(simVars['mouse'].angleYY) );
         var sector = Math.floor((simVars['mouse'].angleYY%360)/90);
         if ( sector >= 0 && sector < 2 || sector < 0 && sector < -2 ) var dir = "up";
-        else var dir = "down"; 
+        else var dir = "down";
 
         if(!detectColition(x,z,null,dir,"w")){
             // go up
@@ -591,16 +600,23 @@ function handleKeys() {
             simVars['mouse'].tz -= 0.0075 * Math.sin( radians(simVars['mouse'].angleYY) );
         }
 
+        if(firstPersonView){
+            globalTx = simVars['mouse'].tx;
+            globalTz = simVars['mouse'].tz;
+        }
     }
     // A or a
     if (currentlyPressedKeys[65] || currentlyPressedKeys[97]){
-        
+
         //var angleY = simVars['mouse'].angleYY + 2.0;
 
         //if(!detectColition(null,null,angleY,"up")&&!detectColition(null,null,angleY,"down")){
             // go left
             simVars['mouse'].angleYY += 2.0;
         //}
+
+        if(firstPersonView)
+            globalAngleYY += 2.0;
     }
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
@@ -609,24 +625,32 @@ function handleKeys() {
         var z = simVars['mouse'].tz + 0.0150 * Math.sin( radians(simVars['mouse'].angleYY) );
         var sector = Math.floor((simVars['mouse'].angleYY%360)/90);
         if ( sector > 0 && sector < 2 || sector < 0 && sector < -2 ) var dir = "up";
-        else var dir = "down";  
- 
+        else var dir = "down";
+
 
         if(!detectColition(x,z,null,dir,"s")){
             // go down
             simVars['mouse'].tx -= 0.0075 * Math.cos( radians(simVars['mouse'].angleYY) );
             simVars['mouse'].tz += 0.0075 * Math.sin( radians(simVars['mouse'].angleYY) );
         }
+
+        if(firstPersonView){
+            globalTx = simVars['mouse'].tx;
+            globalTz = simVars['mouse'].tz;
+        }
     }
     // D or d
     if (currentlyPressedKeys[68] || currentlyPressedKeys[100]){
-        
+
         //var angleY = simVars['mouse'].angleYY - 2.0;
 
         //if(!detectColition(null,null,angleY,"up")&&!detectColition(null,null,angleY,"down")){
             // go right
             simVars['mouse'].angleYY -= 2.0;
         //}
+
+        if(firstPersonView)
+            globalAngleYY -= 2.0;
     }
 }
 
@@ -656,7 +680,7 @@ function handleMouseUp(event) {
 
 function handleMouseMove(event) {
 
-    if (!mouseDown) {
+    if (!mouseDown || blockMouseInput) {
 
       return;
     }
@@ -669,11 +693,11 @@ function handleMouseMove(event) {
 
     var deltaX = newX - lastMouseX;
 
-    globalAngleYY += radians( 10 * deltaX  )
+    globalAngleYY += radians( 5 * deltaX  )
 
     var deltaY = newY - lastMouseY;
 
-    globalAngleXX += radians( 10 * deltaY  )
+    globalAngleXX += radians( 5 * deltaY  )
 
     lastMouseX = newX
 
@@ -721,45 +745,48 @@ function setEventListeners( canvas ){
         reader.readAsText( file );
     }
 
+	// Dropdown list
+	var camera = document.getElementById("camera-selection");
+
+	camera.addEventListener("click", function(){
+		// Getting the selection
+		var c = camera.selectedIndex;
+
+        blockMouseInput = false;
+        firstPersonView = false;
+
+		switch(c){
+			case 0: // Free Camera
+                globalAngleXX = 25.0;
+                globalAngleYY = 0.0;
+                globalTx =  0.0;
+                globalTy = -0.3;
+                globalTz = -3.5;
+				break;
+
+			case 1: // Top View
+                globalAngleXX = 90.0;
+                globalAngleYY = 0.0;
+                globalTx =  0.0;
+                globalTy =  0.0;
+                globalTz = -2.5;
+                blockMouseInput = true;
+				break;
+
+			case 2: // First Person View
+                globalAngleXX = 0.0;
+                globalAngleYY = 0.0;
+                globalTx = - simVars['mouse'].tx;
+                globalTy = -0.0;
+                globalTz = -0.25 - simVars['mouse'].tz;
+                firstPersonView = true;
+				break;
+		}
+	});
+
     document.getElementById("reset-button").onclick = function(){
 
-        // The initial values
-
-        tx = 0.0;
-
-        ty = 0.0;
-
-        tz = 0.0;
-
-        angleXX = 0.0;
-
-        angleYY = 0.0;
-
-        angleZZ = 0.0;
-
-        sx = 1;
-
-        sy = 1;
-
-        sz = 1;
-
-        rotationXX_ON = 0;
-
-        rotationXX_DIR = 1;
-
-        rotationXX_SPEED = 1;
-
-        rotationYY_ON = 0;
-
-        rotationYY_DIR = 1;
-
-        rotationYY_SPEED = 1;
-
-        rotationZZ_ON = 0;
-
-        rotationZZ_DIR = 1;
-
-        rotationZZ_SPEED = 1;
+        resetMap();
     };
 }
 
