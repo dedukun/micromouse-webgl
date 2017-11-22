@@ -39,8 +39,8 @@ var pos_Viewer = [ 0.0, 0.0, 0.0, 1.0 ];
 // First Person View Camera
 var firstPersonView = false;
 
-// Block User Mouse Inputs (Rotations)
-var blockMouseInput = false;
+// Block User User Inputs (Rotations)
+var blockUserInput = false;
 
 // Ambient coef.
 var kAmbi = [ 0.2, 0.2, 0.2 ];
@@ -546,26 +546,14 @@ var currentlyPressedKeys = {};
 
 function handleKeys() {
 
-    // -
-    if (currentlyPressedKeys[190]) {
-        //Zoom out
-        globalSx *= 0.9;
-        globalSz = globalSy = globalSx;
-    }
-    // +
-    if (currentlyPressedKeys[188]) {
-        //Zoom in
-        globalSx *= 1.1;
-        globalSz = globalSy = globalSx;
-    }
     // W or w
     if ((currentlyPressedKeys[87] || currentlyPressedKeys[119])){
 
     	goW();
 
         if(firstPersonView){
-            globalTx = simVars['mouse'].tx;
-            globalTz = simVars['mouse'].tz;
+            globalTx = - simVars['mouse'].tx;
+            globalTz = - 0.25 -simVars['mouse'].tz;
         }
     }
     // A or a
@@ -574,7 +562,7 @@ function handleKeys() {
         goA();
 
         if(firstPersonView)
-            globalAngleYY += 2.0;
+            globalAngleYY -= 2.0;
     }
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
@@ -582,8 +570,8 @@ function handleKeys() {
     	goS();
 
         if(firstPersonView){
-            globalTx = simVars['mouse'].tx;
-            globalTz = simVars['mouse'].tz;
+            globalTx = - simVars['mouse'].tx;
+            globalTz = - 0.25 - simVars['mouse'].tz;
         }
     }
     // D or d
@@ -592,7 +580,7 @@ function handleKeys() {
         goD();
 
         if(firstPersonView)
-            globalAngleYY -= 2.0;
+            globalAngleYY += 2.0;
     }
 }
 
@@ -622,7 +610,7 @@ function handleMouseUp(event) {
 
 function handleMouseMove(event) {
 
-    if (!mouseDown || blockMouseInput) {
+    if (!mouseDown || blockUserInput) {
 
       return;
     }
@@ -635,15 +623,36 @@ function handleMouseMove(event) {
 
     var deltaX = newX - lastMouseX;
 
-    globalAngleYY += radians( 5 * deltaX  )
+    globalAngleYY += radians( 5 * deltaX  );
 
     var deltaY = newY - lastMouseY;
 
-    globalAngleXX += radians( 5 * deltaY  )
+    if(!firstPersonView)
+        globalAngleXX += radians( 5 * deltaY  );
 
-    lastMouseX = newX
+    lastMouseX = newX;
 
     lastMouseY = newY;
+}
+
+//https://www.sitepoint.com/html5-javascript-mouse-wheel/
+function handleMouseWheel(event){
+
+    // cross-browser wheel delta
+	var event = window.event || event; // old IE support
+	var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+
+    //Zoom out
+    if (delta < 0 && !blockUserInput) {
+        globalSx *= 0.9;
+        globalSz = globalSy = globalSx;
+    }
+
+    //Zoom in
+    if (delta > 0 && !blockUserInput) {
+        globalSx *= 1.1;
+        globalSz = globalSy = globalSx;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -654,6 +663,11 @@ function setEventListeners( canvas ){
     canvas.onmousedown = handleMouseDown;
     document.onmouseup = handleMouseUp;
     document.onmousemove = handleMouseMove;
+
+    // IE9, Chrome, Safari, Opera
+	document.addEventListener("mousewheel", handleMouseWheel, false);
+	// Firefox
+	document.addEventListener("DOMMouseScroll", handleMouseWheel, false);
 
     // Handling the keyboard
     function handleKeyDown(event) {
@@ -694,33 +708,27 @@ function setEventListeners( canvas ){
 		// Getting the selection
 		var c = camera.selectedIndex;
 
-        blockMouseInput = false;
+        blockUserInput = false;
         firstPersonView = false;
+        resetGlobalVars();
 
 		switch(c){
 			case 0: // Free Camera
                 globalAngleXX = 25.0;
-                globalAngleYY = 0.0;
-                globalTx =  0.0;
                 globalTy = -0.3;
                 globalTz = -3.5;
 				break;
 
 			case 1: // Top View
                 globalAngleXX = 90.0;
-                globalAngleYY = 0.0;
-                globalTx =  0.0;
-                globalTy =  0.0;
                 globalTz = -2.5;
-                blockMouseInput = true;
+                blockUserInput = true;
 				break;
 
 			case 2: // First Person View
-                globalAngleXX = 0.0;
-                globalAngleYY = 0.0;
                 globalTx = - simVars['mouse'].tx;
-                globalTy = -0.0;
-                globalTz = -0.25 - simVars['mouse'].tz;
+                globalTy = -0.04;
+                globalTz = - 0.25 - simVars['mouse'].tz;
                 firstPersonView = true;
 				break;
 		}
@@ -729,7 +737,26 @@ function setEventListeners( canvas ){
     document.getElementById("reset-button").onclick = function(){
 
         resetMap();
+
+        if(firstPersonView){ // reset camera
+            resetGlobalVars();
+            globalTx = - simVars['mouse'].tx;
+            globalTy = -0.04;
+            globalTz = -0.25 - simVars['mouse'].tz;
+        }
     };
+}
+
+// reset Camera/global values;
+function resetGlobalVars(){
+    globalAngleXX = 0.0;
+    globalAngleYY = 0.0;
+    globalTx = 0.0;
+    globalTy = 0.0;
+    globalTz = 0.0;
+    globalSx = 1;
+    globalSy = 1;
+    globalSz = 1;
 }
 
 //----------------------------------------------------------------------------
