@@ -77,10 +77,9 @@ var wallOffset = -1+2*halfThicknessOfPost;
 // half the wall, ~0.116
 var halfWallLateral = (2-17*2*halfThicknessOfPost)/32;
 
-// colition aux vars
-var coorDict = {};
-    //change this to local
-var matrix2D = [];
+// collision aux vars
+var horWalls = [];
+var verWalls = [];
 
 var col = null;
 var row = null;
@@ -380,7 +379,8 @@ function drawEmptyMap(mvMatrix){
 
 function drawWalls(mvMatrix){
 
-    matrix2D = []
+    horWalls = [];
+    verWalls = [];
     row = Math.floor((simVars['mouse'].tz+1)/(2/16));
     col = Math.floor((simVars['mouse'].tx+1)/(2/16));
 
@@ -388,21 +388,23 @@ function drawWalls(mvMatrix){
     initBuffers(simVars['wall']);
     for(var iRow = 0; iRow < simVars['wall']['hor'].length; iRow++){
         for(var iCol = 0; iCol < simVars['wall']['hor'][iRow].length; iCol++){
-            if(simVars['wall']['hor'][iRow][iCol]){
+            if(simVars['wall']['hor'][iRow][iCol]){     //there's a wall
+
                 //  one post offset                  each of 16 segments
                 var x = wallOffset + halfWallLateral + lateral/16 * iCol;
                 var z = postOffset + lateral/16 * iRow;
+       
+               	// save the coords for collision
+               	var coords = [x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
+                if( (iRow == row) && (iCol == col-1) )  { horWalls[0] = coords; }   //up left
+                if( (iRow == row) && (iCol == col) )    { horWalls[1] = coords; }   //up
+                if( (iRow == row) && (iCol == col+1) )  { horWalls[2] = coords; }   //up right
 
-                if((iRow == row) && (iCol == col)) {
-                    // save the coords around for use
-                    matrix2D[0] = [x - 0.058, z + 0.004, x + 0.058, z + 0.004, x + 0.058, z - 0.004, x - 0.058, z - 0.004 ];
-                }
-
-                if((iRow == row+1) && (iCol == col)) {
-                    // save the coords around for use
-                    matrix2D[1] = [x - 0.058, z + 0.004, x + 0.058, z + 0.004, x + 0.058, z - 0.004, x - 0.058, z - 0.004 ];
-                }
-                    // draw
+                if( (iRow == row+1) && (iCol == col-1) ) { horWalls[3] = coords; }  //down left
+                if( (iRow == row+1) && (iCol == col) )   { horWalls[4] = coords; }  //down
+                if( (iRow == row+1) && (iCol == col+1) ) { horWalls[5] = coords; }  //down right
+                
+                // draw
                 drawModel(null, null, null,
                         x, 0, z,
                         mvMatrix,
@@ -411,39 +413,67 @@ function drawWalls(mvMatrix){
                         wallSideTexture,
                         wallTopTexture);
             }
-            else{
-                if((iRow == row) && (iCol == col)) {
-                    // save the coords for colition use
-                    matrix2D[0] = 10;
-                }
-                if((iRow == row+1) && (iCol == col)) {
-                    matrix2D[1] = 10;
-                }
+            else{	//no wall there
+            	if( (iRow == row) && (iCol == col-1) ) { horWalls[0] = 10; } 	//up left
+                if( (iRow == row) && (iCol == col) ) { horWalls[1] = 10; }		//up
+                if( (iRow == row) && (iCol == col+1) ) { horWalls[2] = 10; }	//up right
+
+            	if( (iRow == row+1) && (iCol == col-1)) { horWalls[3] = 10; }	//down left 
+                if( (iRow == row+1) && (iCol == col)) { horWalls[4] = 10; }		//down
+            	if( (iRow == row+1) && (iCol == col+1)) { horWalls[5] = 10; }	//down right
             }
         }
     }
+    //outside of the map
+    if( col == 0 )  { horWalls[0] = 10; }
+    if( col == 15)  { horWalls[2] = 10; }
+    if( col == 0 )  { horWalls[3] = 10; }
+    if( col == 15)  { horWalls[5] = 10; }
 
     // drawing vertical walls
     for(var iRow = 0; iRow < simVars['wall']['ver'].length; iRow++){
         for(var iCol = 0; iCol < simVars['wall']['ver'][iRow].length; iCol++){
             if(simVars['wall']['ver'][iRow][iCol]){
+
                 //  one post offset                  each of 16 segments
                 var x = postOffset + lateral/16 * iCol
                 var z = wallOffset + halfWallLateral + lateral/16 * iRow;
 
-                //save the coords for colition use
+                // save the coords for collision
+                var coords = [x - 0.004, z + 0.062, x + 0.004, z + 0.062, x + 0.004, z - 0.062, x - 0.004, z - 0.062 ];
+                if( (iRow == row-1) && (iCol == col) )  { verWalls[0] = coords; }   //left up
+                if( (iRow == row) && (iCol == col) )    { verWalls[1] = coords; }   //left
+                if( (iRow == row+1) && (iCol == col) )  { verWalls[2] = coords; }   //left down
 
+                if( (iRow == row-1) && (iCol == col+1) ) { verWalls[3] = coords; }  //right up
+                if( (iRow == row) && (iCol == col+1) )   { verWalls[4] = coords; }  //right
+                if( (iRow == row+1) && (iCol == col+1) ) { verWalls[5] = coords; }  //right down
 
+                //draw
                 drawModel(null, 90, null,
                         x, 0, z,
                         mvMatrix,
                         primitiveType,
                         true,
                         wallSideTexture,
-                        wallTopTexture);
-            }
+                        wallTopTexture);            
+	        }
+            else{
+            	if( (iRow == row-1) && (iCol == col) ) { verWalls[0] = 10; } 	//left up
+                if( (iRow == row) && (iCol == col) ) { verWalls[1] = 10; }		//left
+                if( (iRow == row+1) && (iCol == col) ) { verWalls[2] = 10; }	//left down
+
+            	if( (iRow == row-1) && (iCol == col+1) ) { verWalls[3] = 10; }	//right up
+                if( (iRow == row) && (iCol == col+1) ) { verWalls[4] = 10; }	//right
+            	if( (iRow == row+1) && (iCol == col+1) ) { verWalls[5] = 10; }	//right down
+        	}
         }
     }
+    //outside of the map
+    if( row == 0 )  { verWalls[0] = 10; }
+    if( row == 15)  { verWalls[2] = 10; }
+    if( row == 0 )  { verWalls[3] = 10; }
+    if( row == 15)  { verWalls[5] = 10; }
 }
 
 function drawMouse(mvMatrix){
@@ -462,63 +492,6 @@ function drawMouse(mvMatrix){
 
 function drawMarkers(mvMatrix){}
 
-
-
-//----------------------------------------------------------------------------
-
-//  Colition detection
-
-function detectColition(x, z, angY, dir, key){
-    if(x == null) x = simVars['mouse'].tx;
-    if(z == null) z = simVars['mouse'].tz;
-    if(angY == null) angY = simVars['mouse'].angleYY;
-
-    if(dir=="up" && key=="w" || dir=="down" && key=="s") {
-        if(matrix2D[0] == 10) return false;
-    }
-    if(dir=="down" && key=="w" || dir=="up" && key=="s") {
-        if(matrix2D[1] == 10) return false;
-    }
-
-    if (key == "w"){ //front face 2 corners
-        x1 = x - 0.042 * Math.cos(radians(angY));
-        z1 = z - 0.028 * Math.sin(radians(angY));
-        x2 = x + 0.042 * Math.cos(radians(angY));
-        z2 = z - 0.028 * Math.sin(radians(angY));
-    }
-    else{            //back face 2 corners
-        x1 = x - 0.042 * Math.cos(radians(angY));
-        z1 = z + 0.028 * Math.sin(radians(angY));
-        x2 = x + 0.042 * Math.cos(radians(angY));
-        z2 = z + 0.028 * Math.sin(radians(angY));
-    }
-
-    if(dir=="up" && key=="w" || dir=="down" && key=="s") {
-        if (
-            //
-            ((x1 >= matrix2D[0][0] &&  z1 <= matrix2D[0][1])&&
-             (x1 <= matrix2D[0][2] &&  z1 <= matrix2D[0][3]))||
-            //
-            ((x2 >= matrix2D[0][0] &&  z2 <= matrix2D[0][1])&&
-             (x2 <= matrix2D[0][2] &&  z2 <= matrix2D[0][3]))
-           ) {
-                return true;
-        }
-    }
-    else if(dir=="down" && key=="w" || dir=="up" && key=="s") {
-        if (
-            //
-            ((x1 >= matrix2D[1][0] &&  z1 >= matrix2D[1][1])&&
-             (x1 <= matrix2D[1][2] &&  z1 >= matrix2D[1][3]))||
-            //
-            ((x2 >= matrix2D[1][0] &&  z2 >= matrix2D[1][1])&&
-             (x2 <= matrix2D[1][2] &&  z2 >= matrix2D[1][3]))
-           ) {
-                return true;
-        }
-    }
-    return false;
-}
 
 //----------------------------------------------------------------------------
 
@@ -574,13 +547,13 @@ var currentlyPressedKeys = {};
 function handleKeys() {
 
     // -
-    if (currentlyPressedKeys[109]) {
+    if (currentlyPressedKeys[190]) {
         //Zoom out
         globalSx *= 0.9;
         globalSz = globalSy = globalSx;
     }
     // +
-    if (currentlyPressedKeys[107]) {
+    if (currentlyPressedKeys[188]) {
         //Zoom in
         globalSx *= 1.1;
         globalSz = globalSy = globalSx;
@@ -588,17 +561,7 @@ function handleKeys() {
     // W or w
     if ((currentlyPressedKeys[87] || currentlyPressedKeys[119])){
 
-        var x = simVars['mouse'].tx + 0.0150 * Math.cos( radians(simVars['mouse'].angleYY) );
-        var z = simVars['mouse'].tz - 0.0150 * Math.sin( radians(simVars['mouse'].angleYY) );
-        var sector = Math.floor((simVars['mouse'].angleYY%360)/90);
-        if ( sector >= 0 && sector < 2 || sector < 0 && sector < -2 ) var dir = "up";
-        else var dir = "down";
-
-        if(!detectColition(x,z,null,dir,"w")){
-            // go up
-            simVars['mouse'].tx += 0.0075 * Math.cos( radians(simVars['mouse'].angleYY) );
-            simVars['mouse'].tz -= 0.0075 * Math.sin( radians(simVars['mouse'].angleYY) );
-        }
+    	goW();
 
         if(firstPersonView){
             globalTx = simVars['mouse'].tx;
@@ -608,12 +571,7 @@ function handleKeys() {
     // A or a
     if (currentlyPressedKeys[65] || currentlyPressedKeys[97]){
 
-        //var angleY = simVars['mouse'].angleYY + 2.0;
-
-        //if(!detectColition(null,null,angleY,"up")&&!detectColition(null,null,angleY,"down")){
-            // go left
-            simVars['mouse'].angleYY += 2.0;
-        //}
+        goA();
 
         if(firstPersonView)
             globalAngleYY += 2.0;
@@ -621,18 +579,7 @@ function handleKeys() {
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
 
-        var x = simVars['mouse'].tx - 0.0150 * Math.cos( radians(simVars['mouse'].angleYY) );
-        var z = simVars['mouse'].tz + 0.0150 * Math.sin( radians(simVars['mouse'].angleYY) );
-        var sector = Math.floor((simVars['mouse'].angleYY%360)/90);
-        if ( sector > 0 && sector < 2 || sector < 0 && sector < -2 ) var dir = "up";
-        else var dir = "down";
-
-
-        if(!detectColition(x,z,null,dir,"s")){
-            // go down
-            simVars['mouse'].tx -= 0.0075 * Math.cos( radians(simVars['mouse'].angleYY) );
-            simVars['mouse'].tz += 0.0075 * Math.sin( radians(simVars['mouse'].angleYY) );
-        }
+    	goS();
 
         if(firstPersonView){
             globalTx = simVars['mouse'].tx;
@@ -642,12 +589,7 @@ function handleKeys() {
     // D or d
     if (currentlyPressedKeys[68] || currentlyPressedKeys[100]){
 
-        //var angleY = simVars['mouse'].angleYY - 2.0;
-
-        //if(!detectColition(null,null,angleY,"up")&&!detectColition(null,null,angleY,"down")){
-            // go right
-            simVars['mouse'].angleYY -= 2.0;
-        //}
+        goD();
 
         if(firstPersonView)
             globalAngleYY -= 2.0;
