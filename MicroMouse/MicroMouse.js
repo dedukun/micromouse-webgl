@@ -31,29 +31,11 @@ var globalSx = 1;
 var globalSy = 1;
 var globalSz = 1;
 
-// To allow choosing the way of drawing the model triangles
-var primitiveType = null;
-
-// The viewer position
-var pos_Viewer = [ 0.0, 0.0, 0.0, 1.0 ];
-
 // First Person View Camera
 var firstPersonView = false;
 
 // Block User User Inputs (Rotations)
 var blockUserInput = false;
-
-// Ambient coef.
-var kAmbi = [ 1.0, 1.0, 1.0 ];
-
-// Diffuse coef.
-var kDiff = [ 0.6, 0.6, 0.6 ];
-
-// Specular coef.
-var kSpec = [ 0.7, 0.7, 0.7 ];
-
-// Phong coef.
-var nPhong = 32;
 
 //------------------------------------
 // MicroMouse variables
@@ -238,11 +220,10 @@ function initBuffers(model) {
 //----------------------------------------------------------------------------
 
 //  Drawing the model
-
 function drawModel( angleXX, angleYY, angleZZ,
 					tx, ty, tz,
 					mvMatrix,
-					primitiveType,
+                    isMouse,
                     dualTextureMode,
                     modelTexture,
                     modelTexture2 = null) {
@@ -260,10 +241,21 @@ function drawModel( angleXX, angleYY, angleZZ,
     if(angleXX != null)
     	mvMatrix = mult( mvMatrix, rotationXXMatrix( angleXX ) );
 
-
 	// Passing the Model View Matrix to apply the current transformation
-	var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-	gl.uniformMatrix4fv(mvUniform, false, new Float32Array(flatten(mvMatrix)));
+	gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, new Float32Array(flatten(mvMatrix)));
+
+    // Passing the Normal Matrix
+    var normalMatrix;
+    if(!isMouse){
+        normalMatrix = mat3.create();
+        mat4.toInverseMat3(flatten(mvMatrix), normalMatrix);
+        mat3.transpose(normalMatrix);
+    }
+    else{
+        // dont change mouse ilumination with its rotation
+        normalMatrix = mat3(1,1,1);
+    }
+    gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 
     // Passing the buffers
 	gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexPositionBuffer);
@@ -275,27 +267,6 @@ function drawModel( angleXX, angleYY, angleZZ,
 	gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexNormalBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, modelVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	// Material properties
-	gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_ambient"), flatten(kAmbi) );
-    gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_diffuse"), flatten(kDiff) );
-    gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_specular"), flatten(kSpec) );
-	gl.uniform1f( gl.getUniformLocation(shaderProgram, "shininess"), nPhong );
-
-    // Light Sources
-	var numLights = 1;
-	gl.uniform1i( gl.getUniformLocation(shaderProgram, "numLights"), numLights );
-
-	//Light Sources
-	for(var i = 0; i < lightSources.length; i++ )
-	{
-		gl.uniform4fv( gl.getUniformLocation(shaderProgram, "allLights[" + String(i) + "].position"),
-			flatten(lightSources[i].getPosition()) );
-
-		gl.uniform3fv( gl.getUniformLocation(shaderProgram, "allLights[" + String(i) + "].intensities"),
-			flatten(lightSources[i].getIntensity()) );
-    }
-
-
     // Textures
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
@@ -305,7 +276,6 @@ function drawModel( angleXX, angleYY, angleZZ,
 
     if(!dualTextureMode){
         gl.bindTexture(gl.TEXTURE_2D, modelTexture);
-        // Drawing the triangles --- NEW --- DRAWING ELEMENTS
         gl.drawElements(gl.TRIANGLES, modelVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
     else{
@@ -331,35 +301,42 @@ function drawScene() {
 	var mvMatrix = mat4();
 
 	// Clearing the frame-buffer and the depth-buffer
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // HERE
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	// Computing the Projection Matrix
-	// A standard view volume.
-	// Viewer is at (0,0,0)
-	// Ensure that the model is "inside" the view volume
 	pMatrix = perspective( 45, 1, 0.05, 15 );
 
-	//The viewer is on (0,0,0)
-	pos_Viewer[0] = pos_Viewer[1] = pos_Viewer[2] = 10.0;
-	pos_Viewer[3] = 1.0;
-
 	// Passing the Projection Matrix to apply the current projection
-	var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	gl.uniformMatrix4fv(pUniform, false, new Float32Array(flatten(pMatrix)));
+	gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, new Float32Array(flatten(pMatrix)));
 
-	// Passing the viewer position to the vertex shader
-    gl.uniform4fv( gl.getUniformLocation(shaderProgram, "viewerPosition"), flatten(pos_Viewer) );
-
-
-    // Check if lighting is on
+    // Lighting
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
+    if(lighting){
+        gl.uniform3f(
+            shaderProgram.ambientColorUniform,
+            parseFloat(0.1),
+            parseFloat(0.1),
+            parseFloat(0.1)
+        );
+        gl.uniform3f(
+            shaderProgram.pointLightingLocationUniform,
+            parseFloat( 0.0),
+            parseFloat( 1.0),
+            parseFloat(-3.5)
+        );
+        gl.uniform3f(
+            shaderProgram.pointLightingColorUniform,
+            parseFloat(0.9),
+            parseFloat(0.9),
+            parseFloat(0.9)
+        );
+    }
 
 	// GLOBAL TRANSFORMATION FOR THE WHOLE SCENE
-	mvMatrix = translationMatrix(globalTx, globalTy, globalTz );
-	mvMatrix = mult( mvMatrix, rotationXXMatrix( globalAngleXX ) );
-	mvMatrix = mult( mvMatrix, rotationYYMatrix( globalAngleYY ) );
-	mvMatrix = mult( mvMatrix, scalingMatrix( globalSx, globalSy, globalSz ) );
+    mvMatrix = translationMatrix(globalTx, globalTy, globalTz );
+    mvMatrix = mult( mvMatrix, rotationXXMatrix( globalAngleXX ) );
+    mvMatrix = mult( mvMatrix, rotationYYMatrix( globalAngleYY ) );
+    mvMatrix = mult( mvMatrix, scalingMatrix( globalSx, globalSy, globalSz ) );
 
     // Drawing Objects
     drawEmptyMap(mvMatrix);
@@ -383,7 +360,7 @@ function drawEmptyMap(mvMatrix){
 	drawModel( null, null, null,
 			 null, null, null,
 			 mvMatrix,
-			 primitiveType,
+			 false,
              false,
              floorTexture);
 
@@ -400,7 +377,7 @@ function drawEmptyMap(mvMatrix){
 			drawModel(null, null, null,
 					x, 0, z,
 					mvMatrix,
-					primitiveType,
+					false,
                     true,
                     postSideTexture,
                     postTopTexture);
@@ -414,12 +391,12 @@ function drawWalls(mvMatrix){
     for(var iRow = 0; iRow < simVars['wall']['hor'].length; iRow++){
         for(var iCol = 0; iCol < simVars['wall']['hor'][iRow].length; iCol++){
             if(simVars['wall']['hor'][iRow][iCol] != 10){     //there's a wall
-                
+
                 // draw
                 drawModel(null, null, null,
                         simVars['wall']['hor'][iRow][iCol][0], 0, simVars['wall']['hor'][iRow][iCol][1],
                         mvMatrix,
-                        primitiveType,
+                        false,
                         true,
                         wallSideTexture,
                         wallTopTexture);
@@ -436,10 +413,10 @@ function drawWalls(mvMatrix){
                 drawModel(null, 90, null,
                         simVars['wall']['ver'][iRow][iCol][0], 0, simVars['wall']['ver'][iRow][iCol][1],
                         mvMatrix,
-                        primitiveType,
+                        false,
                         true,
                         wallSideTexture,
-                        wallTopTexture);            
+                        wallTopTexture);
             }
         }
     }
@@ -453,7 +430,7 @@ function drawMouse(mvMatrix){
     drawModel( null, simVars['mouse'].angleYY, null,
                simVars['mouse'].tx, 0, simVars['mouse'].tz,
                mvMatrix,
-               primitiveType,
+               true,
                true,
                mouseSideTexture,
                mouseTopTexture);
@@ -902,9 +879,6 @@ function initWebGL( canvas ) {
 
         // DEFAULT: The viewport background color is WHITE
 
-        // Drawing the triangles defining the model
-        primitiveType = gl.TRIANGLES;
-
         // DEFAULT: Face culling is DISABLED
 
         // Enable FACE CULLING
@@ -937,8 +911,6 @@ function runWebGL() {
     setEventListeners( canvas );
 
     simVars = getSimulationVars(); // Get models and variables used
-
- //   calculateNormals( simVars );
 
     initTexture();
 

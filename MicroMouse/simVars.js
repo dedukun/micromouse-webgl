@@ -503,14 +503,3 @@ function getSimulationVars(){
         }
     };
 }
-
-function calculateNormals(simVars){
-
-    for(var key in simVars)
-    {
-        if(simVars.hasOwnProperty(key))
-        {
-            computeVertexNormals( simVars[key]['vertices'], simVars[key]['normals']);
-        }
-    }
-}
