@@ -16,9 +16,10 @@ var gl = null;
 var shaderProgram = null;
 
 // Buffers
-var cubeVertexPositionBuffer = null;
-var cubeVertexIndexBuffer = null;
-var cubeVertexTextureCoordBuffer;
+var modelVertexPositionBuffer = null;
+var modelVertexIndexBuffer = null;
+var modelVertexNormalBuffer = null;
+var modelVertexTextureCoordBuffer;
 
 // The GLOBAL transformation parameters
 var globalAngleXX = 25.0;
@@ -43,22 +44,22 @@ var firstPersonView = false;
 var blockUserInput = false;
 
 // Ambient coef.
-var kAmbi = [ 0.2, 0.2, 0.2 ];
+var kAmbi = [ 1.0, 1.0, 1.0 ];
 
 // Diffuse coef.
-var kDiff = [ 0.7, 0.7, 0.7 ];
+var kDiff = [ 0.6, 0.6, 0.6 ];
 
 // Specular coef.
 var kSpec = [ 0.7, 0.7, 0.7 ];
 
 // Phong coef.
-var nPhong = 100;
-
-// Dictionary with models and variables
-var simVars = null;
+var nPhong = 32;
 
 //------------------------------------
 // MicroMouse variables
+
+// Dictionary with models and variables
+var simVars = null;
 
 var walls = null;
 var visited = null;
@@ -206,25 +207,32 @@ function initTexture() {
 function initBuffers(model) {
 
 	// Coordinates
-	cubeVertexPositionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+	modelVertexPositionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexPositionBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['vertices']), gl.STATIC_DRAW);
-	cubeVertexPositionBuffer.itemSize = 3;
-	cubeVertexPositionBuffer.numItems = model['vertices'].length / 3;
+	modelVertexPositionBuffer.itemSize = 3;
+	modelVertexPositionBuffer.numItems = model['vertices'].length / 3;
 
     // Textures
-    cubeVertexTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
+    modelVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexTextureCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['textureCoords']), gl.STATIC_DRAW);
-    cubeVertexTextureCoordBuffer.itemSize = 2;
-    cubeVertexTextureCoordBuffer.numItems = 24;
+    modelVertexTextureCoordBuffer.itemSize = 2;
+    modelVertexTextureCoordBuffer.numItems = model['textureCoords'].length / 2;
 
 	// Vertex indices
-    cubeVertexIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+    modelVertexIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, modelVertexIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model['faces']), gl.STATIC_DRAW);
-    cubeVertexIndexBuffer.itemSize = 1;
-    cubeVertexIndexBuffer.numItems = model['faces'].length;
+    modelVertexIndexBuffer.itemSize = 1;
+    modelVertexIndexBuffer.numItems = model['faces'].length;
+
+    // Normals
+	modelVertexNormalBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexNormalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model['normals']), gl.STATIC_DRAW);
+	modelVertexNormalBuffer.itemSize = 3;
+	modelVertexNormalBuffer.numItems = model['normals'].length / 3;
 }
 
 //----------------------------------------------------------------------------
@@ -252,29 +260,53 @@ function drawModel( angleXX, angleYY, angleZZ,
     if(angleXX != null)
     	mvMatrix = mult( mvMatrix, rotationXXMatrix( angleXX ) );
 
+
 	// Passing the Model View Matrix to apply the current transformation
-
 	var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-
 	gl.uniformMatrix4fv(mvUniform, false, new Float32Array(flatten(mvMatrix)));
 
     // Passing the buffers
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+	gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, modelVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexTextureCoordBuffer);
+    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, modelVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, modelVertexNormalBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, modelVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	// Material properties
+	gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_ambient"), flatten(kAmbi) );
+    gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_diffuse"), flatten(kDiff) );
+    gl.uniform3fv( gl.getUniformLocation(shaderProgram, "k_specular"), flatten(kSpec) );
+	gl.uniform1f( gl.getUniformLocation(shaderProgram, "shininess"), nPhong );
+
+    // Light Sources
+	var numLights = 1;
+	gl.uniform1i( gl.getUniformLocation(shaderProgram, "numLights"), numLights );
+
+	//Light Sources
+	for(var i = 0; i < lightSources.length; i++ )
+	{
+		gl.uniform4fv( gl.getUniformLocation(shaderProgram, "allLights[" + String(i) + "].position"),
+			flatten(lightSources[i].getPosition()) );
+
+		gl.uniform3fv( gl.getUniformLocation(shaderProgram, "allLights[" + String(i) + "].intensities"),
+			flatten(lightSources[i].getIntensity()) );
+    }
+
 
     // Textures
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
 
+    // The vertex indices
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, modelVertexIndexBuffer);
 
     if(!dualTextureMode){
         gl.bindTexture(gl.TEXTURE_2D, modelTexture);
         // Drawing the triangles --- NEW --- DRAWING ELEMENTS
-        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, modelVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
     else{
         // Not Drawing the bottom
@@ -287,8 +319,6 @@ function drawModel( angleXX, angleYY, angleZZ,
         gl.bindTexture(gl.TEXTURE_2D, modelTexture2);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 48);
     }
-    // The vertex indices
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
 }
 
 //----------------------------------------------------------------------------
@@ -310,10 +340,8 @@ function drawScene() {
 	pMatrix = perspective( 45, 1, 0.05, 15 );
 
 	//The viewer is on (0,0,0)
-	pos_Viewer[0] = pos_Viewer[1] = pos_Viewer[2] = 0.0;
+	pos_Viewer[0] = pos_Viewer[1] = pos_Viewer[2] = 10.0;
 	pos_Viewer[3] = 1.0;
-
-	// TODO - Allow the user to control the size of the view volume
 
 	// Passing the Projection Matrix to apply the current projection
 	var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
@@ -322,18 +350,20 @@ function drawScene() {
 	// Passing the viewer position to the vertex shader
     gl.uniform4fv( gl.getUniformLocation(shaderProgram, "viewerPosition"), flatten(pos_Viewer) );
 
+
+    // Check if lighting is on
+    var lighting = document.getElementById("lighting").checked;
+    gl.uniform1i(shaderProgram.useLightingUniform, lighting);
+
 	// GLOBAL TRANSFORMATION FOR THE WHOLE SCENE
 	mvMatrix = translationMatrix(globalTx, globalTy, globalTz );
-	mvMatrix = mult( mvMatrix, rotationYYMatrix( globalAngleYY ) );
 	mvMatrix = mult( mvMatrix, rotationXXMatrix( globalAngleXX ) );
+	mvMatrix = mult( mvMatrix, rotationYYMatrix( globalAngleYY ) );
 	mvMatrix = mult( mvMatrix, scalingMatrix( globalSx, globalSy, globalSz ) );
-
-	// Updating the position of the light sources, if required
 
     // Drawing Objects
     drawEmptyMap(mvMatrix);
     drawWalls(mvMatrix);
-    drawMarkers(mvMatrix);
 
     //if(!firstPersonView)
     drawMouse(mvMatrix);
@@ -393,7 +423,7 @@ function drawWalls(mvMatrix){
                 //  one post offset                  each of 16 segments
                 var x = wallOffset + halfWallLateral + lateral/16 * iCol;
                 var z = postOffset + lateral/16 * iRow;
-       
+
                	// save the coords for collision
                	var coords = [x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
                 if( (iRow == row) && (iCol == col-1) )  { horWalls[0] = coords; }   //up left
@@ -403,7 +433,7 @@ function drawWalls(mvMatrix){
                 if( (iRow == row+1) && (iCol == col-1) ) { horWalls[3] = coords; }  //down left
                 if( (iRow == row+1) && (iCol == col) )   { horWalls[4] = coords; }  //down
                 if( (iRow == row+1) && (iCol == col+1) ) { horWalls[5] = coords; }  //down right
-                
+
                 // draw
                 drawModel(null, null, null,
                         x, 0, z,
@@ -418,7 +448,7 @@ function drawWalls(mvMatrix){
                 if( (iRow == row) && (iCol == col) ) { horWalls[1] = 10; }		//up
                 if( (iRow == row) && (iCol == col+1) ) { horWalls[2] = 10; }	//up right
 
-            	if( (iRow == row+1) && (iCol == col-1)) { horWalls[3] = 10; }	//down left 
+            	if( (iRow == row+1) && (iCol == col-1)) { horWalls[3] = 10; }	//down left
                 if( (iRow == row+1) && (iCol == col)) { horWalls[4] = 10; }		//down
             	if( (iRow == row+1) && (iCol == col+1)) { horWalls[5] = 10; }	//down right
             }
@@ -456,7 +486,7 @@ function drawWalls(mvMatrix){
                         primitiveType,
                         true,
                         wallSideTexture,
-                        wallTopTexture);            
+                        wallTopTexture);
 	        }
             else{
             	if( (iRow == row-1) && (iCol == col) ) { verWalls[0] = 10; } 	//left up
@@ -489,8 +519,6 @@ function drawMouse(mvMatrix){
                mouseSideTexture,
                mouseTopTexture);
 }
-
-function drawMarkers(mvMatrix){}
 
 
 //----------------------------------------------------------------------------
@@ -934,9 +962,9 @@ function runWebGL() {
 
     simVars = getSimulationVars(); // Get models and variables used
 
-    initTexture();
+ //   calculateNormals( simVars );
 
-    //initBuffers();
+    initTexture();
 
     tick();     // Timer that controls the rendering / animation
 

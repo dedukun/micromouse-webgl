@@ -165,22 +165,8 @@ var lightSources = [];
 
 lightSources.push( new LightSource() );
 
-lightSources[0].setPosition( -1.0, 1.0, 1.0, 0.0 );
+lightSources[0].setPosition( 0.0, 5.0, -3.5, 1.0 );
 
 lightSources[0].setIntensity( 1.0, 1.0, 1.0 );
 
 lightSources[0].setAmbIntensity( 1.0, 1.0, 1.0 );
-
-//// Light source 1
-//
-//lightSources.push( new LightSource() );
-//
-//lightSources[1].setPosition( 10.0, 10.0, 10.0, 1.0 );
-//
-//lightSources[1].setIntensity( 0.0, 0.0, 1.0 );
-//
-//lightSources[1].setAmbIntensity( 0.0, 0.0, 0.2 );
-//
-//lightSources[1].switchRotYYOn();
-//
-//lightSources[1].setRotationSpeed( -0.5 );

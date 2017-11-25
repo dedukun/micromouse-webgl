@@ -66,23 +66,25 @@ function initShaders( gl ) {
 	gl.useProgram(shaderProgram);
 
 	// Coordinates
-
 	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
 	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-	// NEW --- Texture coordinates
-
+	// Texture coordinates
     shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
     gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
-	// NEW --- The matrices
+	// Vertex Normals
+   shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+  gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
+	// The matrices
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 
-    // NEW --- The sampler
-
+    // The sampler
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 
+    // Use Lighting
+    shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
 	return shaderProgram;
 }
