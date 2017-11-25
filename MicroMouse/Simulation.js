@@ -15,18 +15,28 @@ function isInside(point, verA, verB, verC, verD){
 }
 
 function detectCollision(x, z){
+    row = Math.floor((simVars['mouse'].tz+1)/(2/16));
+    col = Math.floor((simVars['mouse'].tx+1)/(2/16));
+    horWalls = simVars['wall']['hor'];
+    verWalls = simVars['wall']['ver'];
 
-	for (var i = 0; i <= 5; i++) {
-		if (horWalls[i] == 10) continue;
-		if( isInside([x,z], [horWalls[i][0],horWalls[i][1]], [horWalls[i][2],horWalls[i][3]], [horWalls[i][4],horWalls[i][5]], [horWalls[i][6],horWalls[i][7]]))
-			return true;
-	}
+    for (var i = 0; i <= 1; i++) {
+        for (var j = -1; j <= 1; j++) {
+            if(col+j<0 || col+j>15) continue;
+            if(horWalls[row+i][col+j] == 10) continue;
+            if( isInside([x, z], [horWalls[row+i][col+j][2],horWalls[row+i][col+j][3]], [horWalls[row+i][col+j][4],horWalls[row+i][col+j][5]], [horWalls[row+i][col+j][6],horWalls[row+i][col+j][7]], [horWalls[row+i][col+j][8],horWalls[row+i][col+j][9]]) )
+                return true;
+        }
+    }
 
-	for (var i = 0; i <= 5; i++) {
-		if (verWalls[i] == 10) continue;
-		if( isInside([x,z], [verWalls[i][0],verWalls[i][1]], [verWalls[i][2],verWalls[i][3]], [verWalls[i][4],verWalls[i][5]], [verWalls[i][6],verWalls[i][7]]))
-			return true;
-	}
+    for (var i = -1; i <= 1; i++) {
+        for (var j = 0; j <= 1; j++) {
+            if(row+i<0 || row+i>15) continue;
+            if(verWalls[row+i][col+j] == 10) continue;
+            if( isInside([x, z], [verWalls[row+i][col+j][2],verWalls[row+i][col+j][3]], [verWalls[row+i][col+j][4],verWalls[row+i][col+j][5]], [verWalls[row+i][col+j][6],verWalls[row+i][col+j][7]], [verWalls[row+i][col+j][8],verWalls[row+i][col+j][9]]) )
+                return true;
+        }
+    }
 
 	return false;
 }
@@ -36,9 +46,9 @@ function goW(){
     var x = simVars['mouse'].tx + 0.0075 * Math.cos( radians(angleY) );
     var z = simVars['mouse'].tz - 0.0075 * Math.sin( radians(angleY) );
 
-    if(!subW(angleY,x,z)) {
-    	x = simVars['mouse'].tx;
-    	if(!subW(angleY,x,z)) {
+    if(!subW(angleY,x,z)) {      //if can't add both components to position
+    	x = simVars['mouse'].tx; //try adding only x
+    	if(!subW(angleY,x,z)) {  //if can't add x, add only y 
     		x = simVars['mouse'].tx + 0.0075 * Math.cos( radians(angleY) );
    		 	z = simVars['mouse'].tz;
    		 	subW(angleY,x,z);
@@ -60,8 +70,8 @@ function subW(angleY,x,z){
     z2 += 0.014 * Math.cos( radians(angleY) );
 
     // 
-    var x3 = x 	+ 0.042 * Math.cos( radians(angleY) );
-    var z3 = z 	- 0.042 * Math.sin( radians(angleY) );
+    var x3 = x + 0.042 * Math.cos( radians(angleY) );
+    var z3 = z - 0.042 * Math.sin( radians(angleY) );
 
     if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)){
         // go up

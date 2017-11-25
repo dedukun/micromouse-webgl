@@ -409,101 +409,40 @@ function drawEmptyMap(mvMatrix){
 
 function drawWalls(mvMatrix){
 
-    horWalls = [];
-    verWalls = [];
-    row = Math.floor((simVars['mouse'].tz+1)/(2/16));
-    col = Math.floor((simVars['mouse'].tx+1)/(2/16));
-
     // drawing horizontal walls
     initBuffers(simVars['wall']);
     for(var iRow = 0; iRow < simVars['wall']['hor'].length; iRow++){
         for(var iCol = 0; iCol < simVars['wall']['hor'][iRow].length; iCol++){
-            if(simVars['wall']['hor'][iRow][iCol]){     //there's a wall
-
-                //  one post offset                  each of 16 segments
-                var x = wallOffset + halfWallLateral + lateral/16 * iCol;
-                var z = postOffset + lateral/16 * iRow;
-
-               	// save the coords for collision
-               	var coords = [x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
-                if( (iRow == row) && (iCol == col-1) )  { horWalls[0] = coords; }   //up left
-                if( (iRow == row) && (iCol == col) )    { horWalls[1] = coords; }   //up
-                if( (iRow == row) && (iCol == col+1) )  { horWalls[2] = coords; }   //up right
-
-                if( (iRow == row+1) && (iCol == col-1) ) { horWalls[3] = coords; }  //down left
-                if( (iRow == row+1) && (iCol == col) )   { horWalls[4] = coords; }  //down
-                if( (iRow == row+1) && (iCol == col+1) ) { horWalls[5] = coords; }  //down right
-
+            if(simVars['wall']['hor'][iRow][iCol] != 10){     //there's a wall
+                
                 // draw
                 drawModel(null, null, null,
-                        x, 0, z,
+                        simVars['wall']['hor'][iRow][iCol][0], 0, simVars['wall']['hor'][iRow][iCol][1],
                         mvMatrix,
                         primitiveType,
                         true,
                         wallSideTexture,
                         wallTopTexture);
             }
-            else{	//no wall there
-            	if( (iRow == row) && (iCol == col-1) ) { horWalls[0] = 10; } 	//up left
-                if( (iRow == row) && (iCol == col) ) { horWalls[1] = 10; }		//up
-                if( (iRow == row) && (iCol == col+1) ) { horWalls[2] = 10; }	//up right
-
-            	if( (iRow == row+1) && (iCol == col-1)) { horWalls[3] = 10; }	//down left
-                if( (iRow == row+1) && (iCol == col)) { horWalls[4] = 10; }		//down
-            	if( (iRow == row+1) && (iCol == col+1)) { horWalls[5] = 10; }	//down right
-            }
         }
     }
-    //outside of the map
-    if( col == 0 )  { horWalls[0] = 10; }
-    if( col == 15)  { horWalls[2] = 10; }
-    if( col == 0 )  { horWalls[3] = 10; }
-    if( col == 15)  { horWalls[5] = 10; }
 
     // drawing vertical walls
     for(var iRow = 0; iRow < simVars['wall']['ver'].length; iRow++){
         for(var iCol = 0; iCol < simVars['wall']['ver'][iRow].length; iCol++){
-            if(simVars['wall']['ver'][iRow][iCol]){
-
-                //  one post offset                  each of 16 segments
-                var x = postOffset + lateral/16 * iCol
-                var z = wallOffset + halfWallLateral + lateral/16 * iRow;
-
-                // save the coords for collision
-                var coords = [x - 0.004, z + 0.062, x + 0.004, z + 0.062, x + 0.004, z - 0.062, x - 0.004, z - 0.062 ];
-                if( (iRow == row-1) && (iCol == col) )  { verWalls[0] = coords; }   //left up
-                if( (iRow == row) && (iCol == col) )    { verWalls[1] = coords; }   //left
-                if( (iRow == row+1) && (iCol == col) )  { verWalls[2] = coords; }   //left down
-
-                if( (iRow == row-1) && (iCol == col+1) ) { verWalls[3] = coords; }  //right up
-                if( (iRow == row) && (iCol == col+1) )   { verWalls[4] = coords; }  //right
-                if( (iRow == row+1) && (iCol == col+1) ) { verWalls[5] = coords; }  //right down
+            if(simVars['wall']['ver'][iRow][iCol] != 10){
 
                 //draw
                 drawModel(null, 90, null,
-                        x, 0, z,
+                        simVars['wall']['ver'][iRow][iCol][0], 0, simVars['wall']['ver'][iRow][iCol][1],
                         mvMatrix,
                         primitiveType,
                         true,
                         wallSideTexture,
-                        wallTopTexture);
-	        }
-            else{
-            	if( (iRow == row-1) && (iCol == col) ) { verWalls[0] = 10; } 	//left up
-                if( (iRow == row) && (iCol == col) ) { verWalls[1] = 10; }		//left
-                if( (iRow == row+1) && (iCol == col) ) { verWalls[2] = 10; }	//left down
-
-            	if( (iRow == row-1) && (iCol == col+1) ) { verWalls[3] = 10; }	//right up
-                if( (iRow == row) && (iCol == col+1) ) { verWalls[4] = 10; }	//right
-            	if( (iRow == row+1) && (iCol == col+1) ) { verWalls[5] = 10; }	//right down
-        	}
+                        wallTopTexture);            
+            }
         }
     }
-    //outside of the map
-    if( row == 0 )  { verWalls[0] = 10; }
-    if( row == 15)  { verWalls[2] = 10; }
-    if( row == 0 )  { verWalls[3] = 10; }
-    if( row == 15)  { verWalls[5] = 10; }
 }
 
 function drawMouse(mvMatrix){
@@ -830,25 +769,45 @@ function loadMapDataA(file){
     // ------------------------------------------
     // Loading walls and post position to simVars
 
+    var x;
+    var z;
+
     // Horizontal walls
     for(var line = 0; line < 33; line+=2){
         var tmpWalls = [];
-        for(var x = 0; x < 31; x+=2){
-            tmpWalls[x/2] = (mapStringArray[line][x+1] == '#') | 0;
+        for(var col = 0; col < 31; col+=2){
+            if (mapStringArray[line][col+1] == '#') {
+                x = wallOffset + halfWallLateral + lateral/16*(col/2);
+                z = postOffset + lateral/16*(line/2);
+                tmpWalls[col/2] = [x, z, x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
+            }
+            else {
+                tmpWalls[col/2] = 10;
+            }
         }
-
         simVars['wall']['hor'][line/2] = tmpWalls;
     }
 
     // Vertical walls
     for(var line = 0; line < 32; line+=2){
         var tmpWalls = [];
-        for(var x = 0; x < 33; x+=2){
-            tmpWalls[x/2] = (mapStringArray[line+1][x] == '#') | 0;
+        for(var col = 0; col < 33; col+=2){
+            if (mapStringArray[line+1][col] == '#') {
+                x =postOffset + lateral/16*(col/2);
+                z = wallOffset + halfWallLateral + lateral/16*(line/2);
+                tmpWalls[col/2] = [x, z, x - 0.004, z + 0.062, x + 0.004, z + 0.062, x + 0.004, z - 0.062, x - 0.004, z - 0.062 ];
+            }
+            else {
+                tmpWalls[col/2] = 10;
+            }
         }
-
         simVars['wall']['ver'][line/2] = tmpWalls;
     }
+
+    console.log(simVars['wall']['hor'].length) //17
+    console.log(simVars['wall']['hor'][0].length) //16
+    console.log(simVars['wall']['ver'].length) //16
+    console.log(simVars['wall']['ver'][0].length) //17
 }
 
 function loadMapDataB(file){
@@ -890,11 +849,21 @@ function loadMapDataB(file){
     // ------------------------------------------
     // Loading walls and post position to simVars
 
+    var x;
+    var y;
+
     // Horizontal walls
     for(var line = 0; line < 17; line++){
         var tmpWalls = [];
-        for(var x = 0; x < 32; x+=2){
-            tmpWalls[x/2] = (mapStringArray[line][x+1] == '_') | 0;
+        for(var row = 0; row < 32; row+=2){
+            if(mapStringArray[line][row+1] == '_') {
+                x = wallOffset + halfWallLateral + lateral/16*(col/2);
+                z = postOffset + lateral/16*(line/2);
+                tmpWalls[col/2] = [x, z, x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
+            }
+            else {
+                tmpWalls[col/2] = 10;
+            }
         }
 
         simVars['wall']['hor'][line] = tmpWalls;
@@ -903,8 +872,15 @@ function loadMapDataB(file){
     // Vertical walls
     for(var line = 0; line < 16; line++){
         var tmpWalls = [];
-        for(var x = 0; x < 33; x+=2){
-            tmpWalls[x/2] = (mapStringArray[line+1][x] == '|') | 0;
+        for(var row = 0; row < 33; row+=2){
+            if (mapStringArray[line+1][row] == '|') {
+                x =postOffset + lateral/16*(col/2);
+                z = wallOffset + halfWallLateral + lateral/16*(line/2);
+                tmpWalls[col/2] = [x, z, x - 0.004, z + 0.062, x + 0.004, z + 0.062, x + 0.004, z - 0.062, x - 0.004, z - 0.062 ];
+            }
+            else {
+                tmpWalls[col/2] = 10;
+            }
         }
 
         simVars['wall']['ver'][line] = tmpWalls;
