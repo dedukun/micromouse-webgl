@@ -314,14 +314,14 @@ function drawScene() {
     if(lighting){
         gl.uniform3f(
             shaderProgram.ambientColorUniform,
-            parseFloat(0.1),
-            parseFloat(0.1),
-            parseFloat(0.1)
+            parseFloat(0.4),
+            parseFloat(0.4),
+            parseFloat(0.4)
         );
         gl.uniform3f(
             shaderProgram.pointLightingLocationUniform,
             parseFloat( 0.0),
-            parseFloat( 1.0),
+            parseFloat(10.0),
             parseFloat(-3.5)
         );
         gl.uniform3f(
@@ -374,7 +374,7 @@ function drawEmptyMap(mvMatrix){
 		    // each of 16 segments
 			x = postOffset + lateral/16 * i;
 			z = postOffset + lateral/16 * j;
-			drawModel(null, null, null,
+			drawModel(null, -180, null,
 					x, 0, z,
 					mvMatrix,
 					false,
@@ -393,7 +393,7 @@ function drawWalls(mvMatrix){
             if(simVars['wall']['hor'][iRow][iCol] != 10){     //there's a wall
 
                 // draw
-                drawModel(null, null, null,
+                drawModel(null, 180, null,
                         simVars['wall']['hor'][iRow][iCol][0], 0, simVars['wall']['hor'][iRow][iCol][1],
                         mvMatrix,
                         false,
