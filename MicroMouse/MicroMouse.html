@@ -1,202 +1,287 @@
-<!DOCTYPE html>
-
-<html>
-
-<head>
-
 <!--
 
 Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 
 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Guinness World Records">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 
-<title>MicroMouse Project</title>
+    <title>Micromouse</title>
 
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+	<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.light_blue-indigo.min.css">
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 
-<!-- from learningwebgl.com -->
-<script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
-    attribute vec3 aVertexNormal;
-    attribute vec2 aTextureCoord;
+	<!-- from learningwebgl.com -->
+	<script id="shader-vs" type="x-shader/x-vertex">
+	    attribute vec3 aVertexPosition;
+	    attribute vec3 aVertexNormal;
+	    attribute vec2 aTextureCoord;
 
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-    uniform mat3 uNMatrix;
+	    uniform mat4 uMVMatrix;
+	    uniform mat4 uPMatrix;
+	    uniform mat3 uNMatrix;
 
-    uniform vec3 uAmbientColor;
+	    uniform vec3 uAmbientColor;
 
-    uniform vec3 uPointLightingLocation;
-    uniform vec3 uPointLightingColor;
+	    uniform vec3 uPointLightingLocation;
+	    uniform vec3 uPointLightingColor;
 
-    uniform bool uUseLighting;
+	    uniform bool uUseLighting;
 
-    varying vec2 vTextureCoord;
-    varying vec3 vLightWeighting;
+	    varying vec2 vTextureCoord;
+	    varying vec3 vLightWeighting;
 
-    void main(void) {
-        vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
-        gl_Position = uPMatrix * mvPosition;
-        vTextureCoord = aTextureCoord;
+	    void main(void) {
+	        vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+	        gl_Position = uPMatrix * mvPosition;
+	        vTextureCoord = aTextureCoord;
 
-        if (!uUseLighting) {
-            vLightWeighting = vec3(1.0, 1.0, 1.0);
-        } else {
-            vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
+	        if (!uUseLighting) {
+	            vLightWeighting = vec3(1.0, 1.0, 1.0);
+	        } else {
+	            vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
 
-            vec3 transformedNormal = uNMatrix * aVertexNormal;
-            float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
-            vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
-        }
-    }
-</script>
+	            vec3 transformedNormal = uNMatrix * aVertexNormal;
+	            float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
+	            vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
+	        }
+	    }
+	</script>
 
-<script id="shader-fs" type="x-shader/x-fragment">
-    precision mediump float;
+	<script id="shader-fs" type="x-shader/x-fragment">
+	    precision mediump float;
 
-    varying vec2 vTextureCoord;
-    varying vec3 vLightWeighting;
+	    varying vec2 vTextureCoord;
+	    varying vec3 vLightWeighting;
 
-    uniform sampler2D uSampler;
+	    uniform sampler2D uSampler;
 
-    void main(void) {
-        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
-    }
-</script>
+	    void main(void) {
+	        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+	        gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+	    }
+	</script>
 
-<!-- The JS files -->
+	<!-- The JS files -->
 
-<!-- Some useful functions for browser compatibility -->
+	<!-- Some useful functions for browser compatibility -->
 
-<script type="text/javascript" src="webgl-utils.js"></script>
+	<script type="text/javascript" src="webgl-utils.js"></script>
 
-<!-- Handling vectors and matrices -->
+	<!-- Handling vectors and matrices -->
 
-<script type="text/javascript" src="maths.js"></script>
+	<script type="text/javascript" src="maths.js"></script>
 
-<!-- Processing triangle mesh models -->
+	<!-- Processing triangle mesh models -->
 
-<script type="text/javascript" src="models.js"></script>
+	<script type="text/javascript" src="models.js"></script>
 
-<!-- WebGL code -->
+	<!-- WebGL code -->
 
-<script type="text/javascript" src="initShaders.js"></script>
+	<script type="text/javascript" src="initShaders.js"></script>
 
-<script type="text/javascript" src="MicroMouse.js"></script>
+	<script type="text/javascript" src="MicroMouse.js"></script>
 
-<!-- Dictionary with maze models and variables -->
+	<!-- Dictionary with maze models and variables -->
 
-<script type="text/javascript" src="simVars.js"></script>
+	<script type="text/javascript" src="simVars.js"></script>
 
-<!-- Simulation Logic -->
-<script type="text/javascript" src="Simulation.js"></script>
+	<!-- Simulation Logic -->
+	<script type="text/javascript" src="Simulation.js"></script>
 
-<!-- From glMatrix-0.9.5.min.js -->
-<script type="text/javascript">
-glMatrixArrayType=typeof Float32Array!="undefined"?Float32Array:typeof WebGLFloatArray!="undefined"?WebGLFloatArray:Array;
-mat3.create=function(a){
-    var b=new glMatrixArrayType(9);
+	<!-- From glMatrix-0.9.5.min.js -->
+	<script type="text/javascript">
+	glMatrixArrayType=typeof Float32Array!="undefined"?Float32Array:typeof WebGLFloatArray!="undefined"?WebGLFloatArray:Array;
+	mat3.create=function(a){
+	    var b=new glMatrixArrayType(9);
 
-    if(a){
-        b[0]=a[0];b[1]=a[1];
-        b[2]=a[2];b[3]=a[3];
-        b[4]=a[4];b[5]=a[5];
-        b[6]=a[6];b[7]=a[7];
-        b[8]=a[8];b[9]=a[9]
-    }
-    return b
-};
-mat4.toInverseMat3=function(a,b){
-    var c=a[0],
-        d=a[1],
-        e=a[2],
-        g=a[4],
-        f=a[5],
-        h=a[6],
-        i=a[8],
-        j=a[9],
-        k=a[10],
-        l=k*f-h*j,
-        o=-k*g+h*i,
-        m=j*g-f*i,
-        n=c*l+d*o+e*m;
-    if(!n)return null;
-    n = 1 / n;
-    b||(b=mat3.create());
-    b[0]=l*n;
-    b[1]=(-k*d+e*j)*n;
-    b[2]=(h*d-e*f)*n;
-    b[3]=o*n;
-    b[4]=(k*c-e*i)*n;
-    b[5]=(-h*c+e*g)*n;
-    b[6]=m*n;
-    b[7]=(-j*c+d*i)*n;
-    b[8]=(f*c-d*g)*n;
-    return b
-};
-mat3.transpose=function(a,b){
-    if(!b||a==b){
-        var c=a[1],
-            d=a[2],
-            e=a[5];
+	    if(a){
+	        b[0]=a[0];b[1]=a[1];
+	        b[2]=a[2];b[3]=a[3];
+	        b[4]=a[4];b[5]=a[5];
+	        b[6]=a[6];b[7]=a[7];
+	        b[8]=a[8];b[9]=a[9]
+	    }
+	    return b
+	};
+	mat4.toInverseMat3=function(a,b){
+	    var c=a[0],
+	        d=a[1],
+	        e=a[2],
+	        g=a[4],
+	        f=a[5],
+	        h=a[6],
+	        i=a[8],
+	        j=a[9],
+	        k=a[10],
+	        l=k*f-h*j,
+	        o=-k*g+h*i,
+	        m=j*g-f*i,
+	        n=c*l+d*o+e*m;
+	    if(!n)return null;
+	    n = 1 / n;
+	    b||(b=mat3.create());
+	    b[0]=l*n;
+	    b[1]=(-k*d+e*j)*n;
+	    b[2]=(h*d-e*f)*n;
+	    b[3]=o*n;
+	    b[4]=(k*c-e*i)*n;
+	    b[5]=(-h*c+e*g)*n;
+	    b[6]=m*n;
+	    b[7]=(-j*c+d*i)*n;
+	    b[8]=(f*c-d*g)*n;
+	    return b
+	};
+	mat3.transpose=function(a,b){
+	    if(!b||a==b){
+	        var c=a[1],
+	            d=a[2],
+	            e=a[5];
 
-        a[1]=a[3];
-        a[2]=a[6];
-        a[3]=c;
-        a[5]=a[7];
-        a[6]=d;
-        a[7]=e;
+	        a[1]=a[3];
+	        a[2]=a[6];
+	        a[3]=c;
+	        a[5]=a[7];
+	        a[6]=d;
+	        a[7]=e;
 
-        return a
-    }
+	        return a
+	    }
 
-    b[0]=a[0];
-    b[1]=a[3];
-    b[2]=a[6];
-    b[3]=a[1];
-    b[4]=a[4];
-    b[5]=a[7];
-    b[6]=a[2];
-    b[7]=a[5];
-    b[8]=a[8];
-    return b
-};
-</script>
+	    b[0]=a[0];
+	    b[1]=a[3];
+	    b[2]=a[6];
+	    b[3]=a[1];
+	    b[4]=a[4];
+	    b[5]=a[7];
+	    b[6]=a[2];
+	    b[7]=a[5];
+	    b[8]=a[8];
+	    return b
+	};
+	</script>
 </head>
-
 <body onload="runWebGL();">
+	<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+	    <header class="mdl-layout__header portfolio-header">
+	        <div class="mdl-layout__header-row portfolio-logo-row">
+	            <div class="mdl-layout__title">
+	                <div class="portfolio-logo"></div>
+		                <span class="mdl-layout__title">
+		                   	<strong>M</strong>icromouse
+		                    <strong>S</strong>imulator
+		            	</span>
+	            </div>
+	        </div>
+	    </header>
+		<div class="mdl-grid mdl-cell--12-col mdl-shadow--4dp">
+			<!--###########################################################################-->
+			<div class="mdl-cell--3-col">
+			</div>
+			<!--######################## canvas #########################-->
+			<div class="mdl-grid mdl-cell--5-col">
+				<div class="mdl-shadow--4dp">
+					<canvas id="my-canvas" style="width: auto; height: 75vh" width="350" height="350"></canvas>
+				</div>
+				<p id="fps"> fps: </p>
+			</div>
+			<div class="mdl-grid mdl-cell--2-col">
+				<!--################################ cards ###############################-->
+				<div class="mdl-cell--7-col portfolio-card">
+	  				<div class="mdl-card__supporting-text">
+						<button id="reset-button" class="mdl-button mdl-js-button mdl-button--fab mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+						 	<i class="material-icons">autorenew</i>
+						</button>
+						<input type="file" id="file">
+						<label for="file" class="mdl-button mdl-js-button mdl-button--fab mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+							<i class="material-icons">file_upload</i>
+						</label>
+	  				</div>
+				</div>
+				<!--###########################################################################-->
+				<div class="mdl-cell--7-col portfolio-card">
+	  				<div class="mdl-card__supporting-text  mdl-shadow--4dp">
+						<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="lighting">
+							<span class="mdl-switch__label">Lighting</span>
+  							<input type="checkbox" id="lighting" class="mdl-switch__input" checked>
+						</label>
+	  				</div>
+				</div>
+				<!--###########################################################################-->
+				<div class="mdl-cell--7-col portfolio-card">
+	  				<div class="mdl-card__title">
+	    				<h2 class="mdl-card__title-text">
+	      					<strong>Movement</strong>
+	    				</h2>
+	  				</div>
+	  				<div class="mdl-card__supporting-text  mdl-shadow--4dp">
+						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
+	  						<input type="radio" id="option-2" class="mdl-radio__button" name="options" value="1">
+	  						<span class="mdl-radio__label">Free</span>
+						</label>
+						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
+	  						<input type="radio" id="option-1" class="mdl-radio__button" name="options" value="0" checked>
+	  						<span class="mdl-radio__label">Constrained</span>
+						</label>
+	  				</div>
+				</div>
 
-	<div style="text-align: center">
+				<!--###########################################################################-->
 
-		<p>MicroMouse</p>
-
-		<canvas id="my-canvas" style="border:1px solid #000000;  width: auto; height: 80vh" width="350" height="350"></canvas>
-
-		<p id="fps"> fps: </p>
-
-        <p>Cameras:
-            <select id="camera-selection">
-                <option value="0">Free Camera</option>
-                <option value="1">Top View</option>
-                <option value="2">First Person View</option>
-            </select>
-        </p>
-
-        <p>
-            <input type="checkbox" id="lighting" checked /> Use lighting<br/>
-        </p>
-
-        <p>Read new Map:
-            <input type="file" id="file" name="file">
-		</p>
-
-        <p>
-            <button id="reset-button">Reset</button>
-		</p>
-
+				<div class="mdl-cell--7-col portfolio-card">
+	  				<div class="mdl-card__title ">
+	    				<h2 class="mdl-card__title-text">
+	      					<strong>Camera</strong>
+	    				</h2>
+	  				</div>
+	  				<div class="mdl-card__supporting-text  mdl-shadow--4dp">
+						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="camera-0">
+		  					<input type="radio" id="camera-0" class="mdl-radio__button" name="camera" value="0" checked>
+		  					<span class="mdl-radio__label">Free</span>
+						</label>
+						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="camera-1">
+		  					<input type="radio" id="camera-1" class="mdl-radio__button" name="camera" value="1">
+		  					<span class="mdl-radio__label">Top View</span>
+						</label>
+						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="camera-2">
+		  					<input type="radio" id="camera-2" class="mdl-radio__button" name="camera" value="2">
+		  					<span class="mdl-radio__label">First Person</span>
+						</label>
+	  				</div>
+				</div>
+				<!--###########################################################################-->
+				<div class="mdl-cell--8-col">
+				</div>
+				<!--###########################################################################-->
+				<div class="mdl-cell--8-col">
+				</div>
+				<!--###########################################################################-->
+				<div class="mdl-cell--8-col">
+				</div>
+				<!--###########################################################################-->
+				<div class="mdl-cell--8-col">
+				</div>
+				<!--###########################################################################-->
+				<div class="mdl-cell--8-col">
+				</div>
+			</div>
+			<!--###########################################################################-->
+			<div class="mdl-layout-spacer"></div>
+		</div>
+	    <footer class="mdl-mega-footer">
+	        <div class="mdl-logo">© CV 2017</div>
+	    </footer>
 	</div>
-
 </body>
-
 </html>
+

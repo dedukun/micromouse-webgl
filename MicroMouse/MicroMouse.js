@@ -62,9 +62,6 @@ var wallOffset = -1+2*halfThicknessOfPost;
 var halfWallLateral = (2-17*2*halfThicknessOfPost)/32;
 
 // collision aux vars
-var horWalls = [];
-var verWalls = [];
-
 var col = null;
 var row = null;
 
@@ -502,7 +499,12 @@ function handleKeys() {
     // W or w
     if ((currentlyPressedKeys[87] || currentlyPressedKeys[119])){
 
-    	goW();
+        if ( controlMode  == 0 ) {
+            constGoW();
+        }  
+        else {
+           goW();
+        }
 
         if(firstPersonView){
             globalTx = - simVars['mouse'].tx;
@@ -511,8 +513,13 @@ function handleKeys() {
     }
     // A or a
     if (currentlyPressedKeys[65] || currentlyPressedKeys[97]){
-
-        goA();
+        
+        if ( controlMode == 0 ) {
+            constGoA();
+        }  
+        else {
+            goA();
+        }
 
         if(firstPersonView)
             fPVAngle = -(simVars['mouse'].angleYY-90);
@@ -520,7 +527,12 @@ function handleKeys() {
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
 
-    	goS();
+    	if ( controlMode == 0 ) {
+            constGoS();
+        }  
+        else {
+           goS();
+        }
 
         if(firstPersonView){
             globalTx = - simVars['mouse'].tx;
@@ -530,7 +542,12 @@ function handleKeys() {
     // D or d
     if (currentlyPressedKeys[68] || currentlyPressedKeys[100]){
 
-        goD();
+        if ( controlMode == 0 ) {
+            constGoD();
+        }  
+        else {
+            goD();
+        }
 
         if(firstPersonView)
             fPVAngle = -(simVars['mouse'].angleYY-90);
@@ -654,40 +671,53 @@ function setEventListeners( canvas ){
         reader.readAsText( file );
     }
 
-	// Dropdown list
-	var camera = document.getElementById("camera-selection");
+    var camera0 = document.getElementById("camera-0");
+    var camera1 = document.getElementById("camera-1");
+    var camera2 = document.getElementById("camera-2");
 
-	camera.addEventListener("click", function(){
-		// Getting the selection
-		var c = camera.selectedIndex;
+    camera0.addEventListener("click", function(){
 
         blockUserInput = false;
         firstPersonView = false;
         resetGlobalVars();
+        // Free Camera
+        globalAngleXX = 25.0;
+        globalTy = -0.3;
+        globalTz = -3.5;
+    });
+    camera1.addEventListener("click", function(){
 
-		switch(c){
-			case 0: // Free Camera
-                globalAngleXX = 25.0;
-                globalTy = -0.3;
-                globalTz = -3.5;
-				break;
+        blockUserInput = false;
+        firstPersonView = false;
+        resetGlobalVars();
+        // Top View
+        globalAngleXX = 90.0;
+        globalTz = -2.5;
+        blockUserInput = true;
+    });
+    camera2.addEventListener("click", function(){
 
-			case 1: // Top View
-                globalAngleXX = 90.0;
-                globalTz = -2.5;
-                blockUserInput = true;
-				break;
+    blockUserInput = false;
+    firstPersonView = false;
+    resetGlobalVars();
+    // First Person View
+    globalTx = - simVars['mouse'].tx;
+    globalTy = -0.04;
+    globalTz = - 0.25 - simVars['mouse'].tz;
+    firstPersonView = true;
+    });
 
-			case 2: // First Person View
-                globalTx = - simVars['mouse'].tx;
-                globalTy = -0.03;
-                globalTz = - simVars['mouse'].tz;
-                fPVAngle = -(simVars['mouse'].angleYY-90);
-                blockUserInput = true;
-                firstPersonView = true;
-				break;
-		}
-	});
+    var control1 = document.getElementById("option-1"); 
+    var control2 = document.getElementById("option-2"); 
+
+    control1.addEventListener("click", function(){
+        controlMode = 0;
+    });
+
+
+    control2.addEventListener("click", function(){
+        controlMode = 1;
+    });
 
     document.getElementById("reset-button").onclick = function(){
 
@@ -696,9 +726,8 @@ function setEventListeners( canvas ){
         if(firstPersonView){ // reset camera
             resetGlobalVars();
             globalTx = - simVars['mouse'].tx;
-            globalTy = - 0.03;
-            globalTz = - simVars['mouse'].tz;
-            fPVAngle = -(simVars['mouse'].angleYY-90);
+            globalTy = -0.04;
+            globalTz = -0.25 - simVars['mouse'].tz;
         }
     };
 }
