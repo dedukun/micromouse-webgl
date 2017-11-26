@@ -443,11 +443,155 @@ function drawMouse(mvMatrix){
                mouseTopTexture);
 }
 
+//----------------------------------------------------------------------------
+
+var lastAnimateTime = 0;
+var animationSpeed = 3;
+var animationInProg = false;
+var newAnimation = true;
+var animationType;
+var animationAux = 0;
+var animationXAxis = true;
+function animate(){
+
+    var now = new Date().getTime();
+    if(lastAnimateTime != 0){
+
+        // Seconds since last call
+        var elapsedSec = (now - lastAnimateTime) / 1000;
+
+        var tmpVar;
+        if(animationType == 0){ // rotate + 90
+            if(newAnimation){
+                animationAux = -90;
+                newAnimation = false;
+            }
+
+            tmpVar = -90 * animationSpeed * elapsedSec;
+
+            simVars['mouse'].angleYY += tmpVar;
+
+            animationAux -= tmpVar;
+
+            if(animationAux > 0){
+                simVars['mouse'].angleYY += animationAux;
+                simVars['mouse'].angleYY = Math.round(simVars['mouse'].angleYY);
+                resetAnimation();
+            }
+        }
+        else if(animationType == 1){ // rotate - 90
+            if(newAnimation){
+                animationAux = 90;
+                newAnimation = false;
+            }
+
+            tmpVar = 90 * animationSpeed * elapsedSec;
+
+            simVars['mouse'].angleYY += tmpVar;
+
+            animationAux -= tmpVar;
+
+            if(animationAux < 0){
+                simVars['mouse'].angleYY += animationAux;
+                simVars['mouse'].angleYY = Math.round(simVars['mouse'].angleYY);
+                resetAnimation();
+            }
+        }
+        else if(animationType == 2){ // Move foward
+
+            if(newAnimation){
+                animationAux = lateral/16;
+                newAnimation = false;
+
+                if(Math.abs(Math.sin(radians(simVars['mouse'].angleYY))) == 1)
+                    animationXAxis = false;
+            }
+
+            tmpVar = (lateral/16) * animationSpeed * elapsedSec;
+
+            if(animationXAxis){
+                simVars['mouse'].tx += tmpVar * Math.cos(radians(simVars['mouse'].angleYY));
+            }
+            else{
+                simVars['mouse'].tz -= tmpVar * Math.sin(radians(simVars['mouse'].angleYY));
+            }
+
+            animationAux -= tmpVar;
+
+            if(animationAux < 0){
+                if(animationXAxis){
+                    simVars['mouse'].tx += animationAux * Math.cos(radians(simVars['mouse'].angleYY));
+                }
+                else{
+                    simVars['mouse'].tz -= animationAux * Math.sin(radians(simVars['mouse'].angleYY));
+                }
+                resetAnimation();
+            }
+        }
+        else if(animationType == 3){ // Move Backwards
+            if(newAnimation){
+                animationAux = lateral/16;
+                newAnimation = false;
+
+                if(Math.abs(Math.sin(radians(simVars['mouse'].angleYY))) == 1)
+                    animationXAxis = false;
+            }
+
+            tmpVar = (lateral/16) * animationSpeed * elapsedSec;
+
+            if(animationXAxis){
+                simVars['mouse'].tx -= tmpVar * Math.cos(radians(simVars['mouse'].angleYY));
+            }
+            else{
+                simVars['mouse'].tz += tmpVar * Math.sin(radians(simVars['mouse'].angleYY));
+            }
+
+            animationAux -= tmpVar;
+
+            if(animationAux < 0){
+                if(animationXAxis){
+                    simVars['mouse'].tx -= animationAux * Math.cos(radians(simVars['mouse'].angleYY));
+                }
+                else{
+                    simVars['mouse'].tz += animationAux * Math.sin(radians(simVars['mouse'].angleYY));
+                }
+                resetAnimation();
+            }
+        }
+    }
+    lastAnimateTime = now;
+}
+
+function resetAnimation(){
+    animationAux = 0;
+    animationType = -1;
+    lastAnimateTime = 0;
+    newAnimation = true;
+    animationXAxis = true;
+    animationInProg = false;
+}
+
+function mouseRotate90(positive){
+    animationInProg = true;
+    if(positive)
+        animationType = 0;
+    else
+        animationType = 1;
+}
+
+function mouseMoveFoward(){
+    animationInProg = true;
+    animationType = 2;
+}
+
+function mouseMoveBackwards(){
+    animationInProg = true;
+    animationType = 3;
+}
 
 //----------------------------------------------------------------------------
 
 // Timer
-
 function tick() {
 
     requestAnimFrame(tick);
@@ -455,7 +599,11 @@ function tick() {
     resizeCanvas(gl.canvas);
     gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
 
-    handleKeys();
+    if(!animationInProg)
+        handleKeys();
+
+    if(controlMode == 0)
+        animate();
 
     drawScene();
 }
@@ -502,7 +650,7 @@ function handleKeys() {
 
         if ( controlMode  == 0 ) {
             constGoW();
-        }  
+        }
         else {
            goW();
         }
@@ -514,10 +662,10 @@ function handleKeys() {
     }
     // A or a
     if (currentlyPressedKeys[65] || currentlyPressedKeys[97]){
-        
+
         if ( controlMode == 0 ) {
             constGoA();
-        }  
+        }
         else {
             goA();
         }
@@ -530,7 +678,7 @@ function handleKeys() {
 
     	if ( controlMode == 0 ) {
             constGoS();
-        }  
+        }
         else {
            goS();
         }
@@ -545,7 +693,7 @@ function handleKeys() {
 
         if ( controlMode == 0 ) {
             constGoD();
-        }  
+        }
         else {
             goD();
         }
@@ -708,21 +856,24 @@ function setEventListeners( canvas ){
     firstPersonView = true;
     });
 
-    var control1 = document.getElementById("option-1"); 
-    var control2 = document.getElementById("option-2"); 
+    var control1 = document.getElementById("option-1");
+    var control2 = document.getElementById("option-2");
 
     control1.addEventListener("click", function(){
         controlMode = 0;
+        resetMap();
     });
 
 
     control2.addEventListener("click", function(){
         controlMode = 1;
+        animationInProg = false;
     });
 
     document.getElementById("reset-button").onclick = function(){
 
         resetMap();
+        resetAnimation();
 
         if(firstPersonView){ // reset camera
             resetGlobalVars();
@@ -822,11 +973,6 @@ function loadMapDataA(file){
         }
         simVars['wall']['ver'][line/2] = tmpWalls;
     }
-
-    console.log(simVars['wall']['hor'].length) //17
-    console.log(simVars['wall']['hor'][0].length) //16
-    console.log(simVars['wall']['ver'].length) //16
-    console.log(simVars['wall']['ver'][0].length) //17
 }
 
 function loadMapDataB(file){
@@ -876,12 +1022,12 @@ function loadMapDataB(file){
         var tmpWalls = [];
         for(var row = 0; row < 32; row+=2){
             if(mapStringArray[line][row+1] == '_') {
-                x = wallOffset + halfWallLateral + lateral/16*(col/2);
-                z = postOffset + lateral/16*(line/2);
-                tmpWalls[col/2] = [x, z, x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
+                x = wallOffset + halfWallLateral + lateral/16*(row/2);
+                z = postOffset + lateral/16*line;
+                tmpWalls[row/2] = [x, z, x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
             }
             else {
-                tmpWalls[col/2] = 10;
+                tmpWalls[row/2] = 10;
             }
         }
 
@@ -893,12 +1039,12 @@ function loadMapDataB(file){
         var tmpWalls = [];
         for(var row = 0; row < 33; row+=2){
             if (mapStringArray[line+1][row] == '|') {
-                x =postOffset + lateral/16*(col/2);
-                z = wallOffset + halfWallLateral + lateral/16*(line/2);
-                tmpWalls[col/2] = [x, z, x - 0.004, z + 0.062, x + 0.004, z + 0.062, x + 0.004, z - 0.062, x - 0.004, z - 0.062 ];
+                x =postOffset + lateral/16*(row/2);
+                z = wallOffset + halfWallLateral + lateral/16*line;
+                tmpWalls[row/2] = [x, z, x - 0.004, z + 0.062, x + 0.004, z + 0.062, x + 0.004, z - 0.062, x - 0.004, z - 0.062 ];
             }
             else {
-                tmpWalls[col/2] = 10;
+                tmpWalls[row/2] = 10;
             }
         }
 
