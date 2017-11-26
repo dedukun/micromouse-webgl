@@ -65,6 +65,7 @@ var halfWallLateral = (2-17*2*halfThicknessOfPost)/32;
 var col = null;
 var row = null;
 
+var controlMode = 0;
 //----------------------------------------------------------------------------
 //
 // Count the number of frames per second (fps)
