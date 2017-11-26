@@ -33,6 +33,7 @@ var globalSz = 1;
 
 // First Person View Camera
 var firstPersonView = false;
+var fPVAngle = 0.0;
 
 // Block User User Inputs (Rotations)
 var blockUserInput = false;
@@ -228,6 +229,14 @@ function drawModel( angleXX, angleYY, angleZZ,
                     modelTexture,
                     modelTexture2 = null) {
 
+    if(firstPersonView){ // First Person View
+        mvMatrix = mult( mvMatrix, translationMatrix(simVars['mouse'].tx, 0, simVars['mouse'].tz ) );
+
+        mvMatrix = mult( mvMatrix, rotationYYMatrix( fPVAngle ));
+
+        mvMatrix = mult( mvMatrix, translationMatrix(-simVars['mouse'].tx, 0, -simVars['mouse'].tz ) );
+    }
+
     // Pay attention to transformation order !!
     if(tx != null)
     	mvMatrix = mult( mvMatrix, translationMatrix( tx, ty, tz ) );
@@ -342,8 +351,8 @@ function drawScene() {
     drawEmptyMap(mvMatrix);
     drawWalls(mvMatrix);
 
-    //if(!firstPersonView)
-    drawMouse(mvMatrix);
+    if(!firstPersonView)
+        drawMouse(mvMatrix);
 
 	// Counting the frames
 	countFrames();
@@ -497,7 +506,7 @@ function handleKeys() {
 
         if(firstPersonView){
             globalTx = - simVars['mouse'].tx;
-            globalTz = - 0.25 -simVars['mouse'].tz;
+            globalTz = - simVars['mouse'].tz;
         }
     }
     // A or a
@@ -506,7 +515,7 @@ function handleKeys() {
         goA();
 
         if(firstPersonView)
-            globalAngleYY -= 2.0;
+            fPVAngle = -(simVars['mouse'].angleYY-90);
     }
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
@@ -515,7 +524,7 @@ function handleKeys() {
 
         if(firstPersonView){
             globalTx = - simVars['mouse'].tx;
-            globalTz = - 0.25 - simVars['mouse'].tz;
+            globalTz = - simVars['mouse'].tz;
         }
     }
     // D or d
@@ -524,7 +533,7 @@ function handleKeys() {
         goD();
 
         if(firstPersonView)
-            globalAngleYY += 2.0;
+            fPVAngle = -(simVars['mouse'].angleYY-90);
     }
 }
 
@@ -671,8 +680,10 @@ function setEventListeners( canvas ){
 
 			case 2: // First Person View
                 globalTx = - simVars['mouse'].tx;
-                globalTy = -0.04;
-                globalTz = - 0.25 - simVars['mouse'].tz;
+                globalTy = -0.03;
+                globalTz = - simVars['mouse'].tz;
+                fPVAngle = -(simVars['mouse'].angleYY-90);
+                blockUserInput = true;
                 firstPersonView = true;
 				break;
 		}
@@ -685,8 +696,9 @@ function setEventListeners( canvas ){
         if(firstPersonView){ // reset camera
             resetGlobalVars();
             globalTx = - simVars['mouse'].tx;
-            globalTy = -0.04;
-            globalTz = -0.25 - simVars['mouse'].tz;
+            globalTy = - 0.03;
+            globalTz = - simVars['mouse'].tz;
+            fPVAngle = -(simVars['mouse'].angleYY-90);
         }
     };
 }
