@@ -473,11 +473,14 @@ function animate(){
 
             animationAux -= tmpVar;
 
-            if(animationAux > 0){
+            if(animationAux > 0){ // Offset
                 simVars['mouse'].angleYY += animationAux;
                 simVars['mouse'].angleYY = Math.round(simVars['mouse'].angleYY);
                 resetAnimation();
             }
+
+            // First Person View Camera Angle
+            fPVAngle = -(simVars['mouse'].angleYY-90);
         }
         else if(animationType == 1){ // rotate - 90
             if(newAnimation){
@@ -491,11 +494,14 @@ function animate(){
 
             animationAux -= tmpVar;
 
-            if(animationAux < 0){
+            if(animationAux < 0){ // Offset
                 simVars['mouse'].angleYY += animationAux;
                 simVars['mouse'].angleYY = Math.round(simVars['mouse'].angleYY);
                 resetAnimation();
             }
+
+            // First Person View Camera Angle
+            fPVAngle = -(simVars['mouse'].angleYY-90);
         }
         else if(animationType == 2){ // Move foward
 
@@ -519,13 +525,20 @@ function animate(){
             animationAux -= tmpVar;
 
             if(animationAux < 0){
-                if(animationXAxis){
+                if(animationXAxis){ // Offset
                     simVars['mouse'].tx += animationAux * Math.cos(radians(simVars['mouse'].angleYY));
                 }
                 else{
                     simVars['mouse'].tz -= animationAux * Math.sin(radians(simVars['mouse'].angleYY));
                 }
+
+                // reset
                 resetAnimation();
+            }
+
+            if(firstPersonView){ // First Persion View Camera
+                globalTx = - simVars['mouse'].tx;
+                globalTz = - simVars['mouse'].tz;
             }
         }
         else if(animationType == 3){ // Move Backwards
@@ -549,14 +562,22 @@ function animate(){
             animationAux -= tmpVar;
 
             if(animationAux < 0){
-                if(animationXAxis){
+                if(animationXAxis){ // Offset
                     simVars['mouse'].tx -= animationAux * Math.cos(radians(simVars['mouse'].angleYY));
                 }
                 else{
                     simVars['mouse'].tz += animationAux * Math.sin(radians(simVars['mouse'].angleYY));
                 }
+
+                // reset
                 resetAnimation();
             }
+
+            if(firstPersonView){ // First Persion View Camera
+                globalTx = - simVars['mouse'].tx;
+                globalTz = - simVars['mouse'].tz;
+            }
+
         }
     }
     lastAnimateTime = now;
@@ -652,12 +673,12 @@ function handleKeys() {
             constGoW();
         }
         else {
-           goW();
-        }
+            goW();
 
-        if(firstPersonView){
-            globalTx = - simVars['mouse'].tx;
-            globalTz = - simVars['mouse'].tz;
+            if(firstPersonView){
+                globalTx = - simVars['mouse'].tx;
+                globalTz = - simVars['mouse'].tz;
+            }
         }
     }
     // A or a
@@ -668,10 +689,10 @@ function handleKeys() {
         }
         else {
             goA();
-        }
 
-        if(firstPersonView)
-            fPVAngle = -(simVars['mouse'].angleYY-90);
+            if(firstPersonView)
+                fPVAngle = -(simVars['mouse'].angleYY-90);
+        }
     }
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
@@ -680,13 +701,14 @@ function handleKeys() {
             constGoS();
         }
         else {
-           goS();
+            goS();
+
+            if(firstPersonView){
+                globalTx = - simVars['mouse'].tx;
+                globalTz = - simVars['mouse'].tz;
+            }
         }
 
-        if(firstPersonView){
-            globalTx = - simVars['mouse'].tx;
-            globalTz = - simVars['mouse'].tz;
-        }
     }
     // D or d
     if (currentlyPressedKeys[68] || currentlyPressedKeys[100]){
@@ -696,10 +718,10 @@ function handleKeys() {
         }
         else {
             goD();
-        }
 
-        if(firstPersonView)
-            fPVAngle = -(simVars['mouse'].angleYY-90);
+            if(firstPersonView)
+                fPVAngle = -(simVars['mouse'].angleYY-90);
+        }
     }
 }
 
@@ -826,34 +848,32 @@ function setEventListeners( canvas ){
 
     camera0.addEventListener("click", function(){
 
-        blockUserInput = false;
-        firstPersonView = false;
         resetGlobalVars();
         // Free Camera
         globalAngleXX = 25.0;
         globalTy = -0.3;
         globalTz = -3.5;
+        blockUserInput = false;
+        firstPersonView = false;
     });
     camera1.addEventListener("click", function(){
 
-        blockUserInput = false;
-        firstPersonView = false;
         resetGlobalVars();
         // Top View
         globalAngleXX = 90.0;
         globalTz = -2.5;
+        firstPersonView = false;
         blockUserInput = true;
     });
     camera2.addEventListener("click", function(){
 
-    blockUserInput = false;
-    firstPersonView = false;
-    resetGlobalVars();
-    // First Person View
-    globalTx = - simVars['mouse'].tx;
-    globalTy = -0.04;
-    globalTz = - 0.25 - simVars['mouse'].tz;
-    firstPersonView = true;
+        resetGlobalVars();
+        // First Person View
+        globalTx = - simVars['mouse'].tx;
+        globalTy = -0.03;
+        globalTz = - 0.25 - simVars['mouse'].tz;
+        blockUserInput = true;
+        firstPersonView = true;
     });
 
     var control1 = document.getElementById("option-1");
@@ -878,7 +898,7 @@ function setEventListeners( canvas ){
         if(firstPersonView){ // reset camera
             resetGlobalVars();
             globalTx = - simVars['mouse'].tx;
-            globalTy = -0.04;
+            globalTy = -0.03;
             globalTz = -0.25 - simVars['mouse'].tz;
         }
     };
