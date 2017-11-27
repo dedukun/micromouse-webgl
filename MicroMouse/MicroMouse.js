@@ -68,6 +68,10 @@ var halfWallLateral = (2-17*2*halfThicknessOfPost)/32;
 var col = null;
 var row = null;
 
+// marks where the mouse has been (doesn't works in free control)
+// Used to draw markers
+var marked = null;
+
 var controlMode = 0;
 //----------------------------------------------------------------------------
 //
@@ -159,6 +163,7 @@ var postTopTexture;
 var postSideTexture;
 var mouseTopTexture;
 var mouseSideTexture;
+var markerTexture;
 
 function initTexture() {
 
@@ -204,6 +209,12 @@ function initTexture() {
 		handleLoadedTexture(mouseSideTexture)
 	}
 
+	markerTexture = gl.createTexture();
+	markerTexture.image = new Image();
+	markerTexture.image.onload = function () {
+		handleLoadedTexture(markerTexture)
+	}
+
 
 	floorTexture.image.src     = simVars['floor'].texture;
 	wallTopTexture.image.src   = simVars['wall'].textureTop;
@@ -212,6 +223,7 @@ function initTexture() {
 	postSideTexture.image.src  = simVars['post'].textureSide;
 	mouseTopTexture.image.src  = simVars['mouse'].textureTop;
 	mouseSideTexture.image.src = simVars['mouse'].textureSide;
+	markerTexture.image.src = simVars['marker1'].texture;
 }
 
 // Handling the Vertex and the Color Buffers
@@ -380,6 +392,8 @@ function drawScene() {
     drawEmptyMap(mvMatrix);
     drawWalls(mvMatrix);
 
+    //drawMarkers(mvMatrix);
+
     if(!firstPersonView)
         drawMouse(mvMatrix);
 
@@ -461,6 +475,19 @@ function drawWalls(mvMatrix){
             }
         }
     }
+}
+
+function drawMarkers(mvMatrix){
+    // Drawing the mouse
+    initBuffers(simVars['marker3']);
+
+    // Instantianting the current model
+    drawModel( null, null, null,
+               0, 0, 0,
+               mvMatrix,
+               true,
+               false,
+               markerTexture);
 }
 
 function drawMouse(mvMatrix){
@@ -936,7 +963,8 @@ function setEventListeners( canvas ){
         // First Person View
         globalTx = - simVars['mouse'].tx;
         globalTy = -0.03;
-        globalTz = - 0.25 - simVars['mouse'].tz;
+        globalTz = - simVars['mouse'].tz;
+        fPVAngle = -(simVars['mouse'].angleYY-90);
         blockUserInput = true;
         firstPersonView = true;
     });
@@ -1253,6 +1281,7 @@ function initWebGL( canvas ) {
         // DEFAULT: The viewport occupies the whole canvas
 
         // DEFAULT: The viewport background color is WHITE
+        gl.clearColor(0, 0, 0, 0.03);
 
         // DEFAULT: Face culling is DISABLED
 
