@@ -1288,7 +1288,7 @@ function loadMapDataB(file){
             if(mapStringArray[line][row+1] == '_') {
                 x = wallOffset + halfWallLateral + lateral/16*(row/2);
                 z = postOffset + lateral/16*line;
-                tmpWalls[row/2] = [x, z, x - 0.062, z + 0.004, x + 0.062, z + 0.004, x + 0.062, z - 0.004, x - 0.062, z - 0.004 ];
+                tmpWalls[row/2] = [x, z, x - 0.066, z + 0.008, x + 0.066, z + 0.008, x + 0.066, z - 0.008, x - 0.066, z - 0.008 ];
             }
             else {
                 tmpWalls[row/2] = 10;
@@ -1305,7 +1305,7 @@ function loadMapDataB(file){
             if (mapStringArray[line+1][row] == '|') {
                 x =postOffset + lateral/16*(row/2);
                 z = wallOffset + halfWallLateral + lateral/16*line;
-                tmpWalls[row/2] = [x, z, x - 0.004, z + 0.062, x + 0.004, z + 0.062, x + 0.004, z - 0.062, x - 0.004, z - 0.062 ];
+                tmpWalls[row/2] = [x, z, x - 0.008, z + 0.066, x + 0.008, z + 0.066, x + 0.008, z - 0.066, x - 0.008, z - 0.066 ];
             }
             else {
                 tmpWalls[row/2] = 10;
