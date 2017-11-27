@@ -119,14 +119,14 @@ function goW(){
 
 function subW(angleY,x,z){
 
-    var x1 = x + 0.028 * Math.cos( radians(angleY) );
-    var z1 = z - 0.028 * Math.sin( radians(angleY) );
+    var x1 = x + 0.042 * Math.cos( radians(angleY) );
+    var z1 = z - 0.042 * Math.sin( radians(angleY) );
     x1 += 0.014 * Math.sin( radians(angleY) );
     z1 -= 0.014 * Math.cos( radians(angleY) );
 
     //
-    var x2 = x + 0.028 * Math.cos( radians(angleY) );
-    var z2 = z - 0.028 * Math.sin( radians(angleY) );
+    var x2 = x + 0.042 * Math.cos( radians(angleY) );
+    var z2 = z - 0.042 * Math.sin( radians(angleY) );
     x2 -= 0.014 * Math.sin( radians(angleY) );
     z2 += 0.014 * Math.cos( radians(angleY) );
 
@@ -134,7 +134,19 @@ function subW(angleY,x,z){
     var x3 = x + 0.042 * Math.cos( radians(angleY) );
     var z3 = z - 0.042 * Math.sin( radians(angleY) );
 
-    if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)){
+    //
+    var x4 = x - 0.042 * Math.cos( radians(angleY) );
+    var z4 = z + 0.042 * Math.sin( radians(angleY) );
+    x4 -= 0.021 * Math.sin( radians(angleY) );
+    z4 += 0.021 * Math.cos( radians(angleY) );
+
+    //
+    var x5 = x - 0.042 * Math.cos( radians(angleY) );
+    var z5 = z + 0.042 * Math.sin( radians(angleY) );
+    x5 += 0.021 * Math.sin( radians(angleY) );
+    z5 -= 0.021 * Math.cos( radians(angleY) );
+
+    if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)&&!detectCollision(x4,z4)&&!detectCollision(x5,z5)){
         // go up
         simVars['mouse'].tx = x;
         simVars['mouse'].tz = z;
@@ -161,22 +173,35 @@ function goS(){
 
 function subS(angleY,x,z){
 
-    var x1 = x - 0.035 * Math.cos( radians(angleY) );
-    var z1 = z + 0.035 * Math.sin( radians(angleY) );
-    x1 -= 0.021 * Math.sin( radians(angleY) );
-    z1 += 0.021 * Math.cos( radians(angleY) );
+    var x1 = x + 0.042 * Math.cos( radians(angleY) );
+    var z1 = z - 0.042 * Math.sin( radians(angleY) );
+    x1 += 0.014 * Math.sin( radians(angleY) );
+    z1 -= 0.014 * Math.cos( radians(angleY) );
 
     //
-    var x2 = x - 0.035 * Math.cos( radians(angleY) );
-    var z2 = z + 0.035 * Math.sin( radians(angleY) );
-    x2 += 0.021 * Math.sin( radians(angleY) );
-    z2 -= 0.021 * Math.cos( radians(angleY) );
+    var x2 = x + 0.042 * Math.cos( radians(angleY) );
+    var z2 = z - 0.042 * Math.sin( radians(angleY) );
+    x2 -= 0.014 * Math.sin( radians(angleY) );
+    z2 += 0.014 * Math.cos( radians(angleY) );
 
     //
     var x3 = x + 0.042 * Math.cos( radians(angleY) );
-    var z3 = z + 0.042 * Math.sin( radians(angleY) );
+    var z3 = z - 0.042 * Math.sin( radians(angleY) );
 
-    if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)){
+    //
+    var x4 = x - 0.042 * Math.cos( radians(angleY) );
+    var z4 = z + 0.042 * Math.sin( radians(angleY) );
+    x4 -= 0.021 * Math.sin( radians(angleY) );
+    z4 += 0.021 * Math.cos( radians(angleY) );
+
+    //
+    var x5 = x - 0.042 * Math.cos( radians(angleY) );
+    var z5 = z + 0.042 * Math.sin( radians(angleY) );
+    x5 += 0.021 * Math.sin( radians(angleY) );
+    z5 -= 0.021 * Math.cos( radians(angleY) );
+
+
+     if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)&&!detectCollision(x4,z4)&&!detectCollision(x5,z5)){
         // go down
         simVars['mouse'].tx = x ;
         simVars['mouse'].tz = z ;
@@ -190,31 +215,34 @@ function goA(){
     var x = simVars['mouse'].tx;
     var z = simVars['mouse'].tz;
 
-    //
-    var x1 = x + 0.028 * Math.cos( radians(angleY) );
-    var z1 = z - 0.028 * Math.sin( radians(angleY) );
+    var x1 = x + 0.042 * Math.cos( radians(angleY) );
+    var z1 = z - 0.042 * Math.sin( radians(angleY) );
     x1 += 0.014 * Math.sin( radians(angleY) );
     z1 -= 0.014 * Math.cos( radians(angleY) );
 
     //
-    var x2 = x + 0.028 * Math.cos( radians(angleY) );
-    var z2 = z - 0.028 * Math.sin( radians(angleY) );
+    var x2 = x + 0.042 * Math.cos( radians(angleY) );
+    var z2 = z - 0.042 * Math.sin( radians(angleY) );
     x2 -= 0.014 * Math.sin( radians(angleY) );
     z2 += 0.014 * Math.cos( radians(angleY) );
 
     //
-    var x3 = x - 0.035 * Math.cos( radians(angleY) );
-    var z3 = z + 0.035 * Math.sin( radians(angleY) );
-    x3 -= 0.021 * Math.sin( radians(angleY) );
-    z3 += 0.021 * Math.cos( radians(angleY) );
+    var x3 = x + 0.042 * Math.cos( radians(angleY) );
+    var z3 = z - 0.042 * Math.sin( radians(angleY) );
 
     //
-    var x4 = x - 0.035 * Math.cos( radians(angleY) );
-    var z4 = z + 0.035 * Math.sin( radians(angleY) );
-    x4 += 0.021 * Math.sin( radians(angleY) );
-    z4 -= 0.021 * Math.cos( radians(angleY) );
+    var x4 = x - 0.042 * Math.cos( radians(angleY) );
+    var z4 = z + 0.042 * Math.sin( radians(angleY) );
+    x4 -= 0.021 * Math.sin( radians(angleY) );
+    z4 += 0.021 * Math.cos( radians(angleY) );
 
-    if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)&&!detectCollision(x4,z4)){
+    //
+    var x5 = x - 0.042 * Math.cos( radians(angleY) );
+    var z5 = z + 0.042 * Math.sin( radians(angleY) );
+    x5 += 0.021 * Math.sin( radians(angleY) );
+    z5 -= 0.021 * Math.cos( radians(angleY) );
+
+     if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)&&!detectCollision(x4,z4)&&!detectCollision(x5,z5)){
         simVars['mouse'].angleYY += 2.0;
         if(Math.abs(simVars['mouse'].angleYY) > 360)
             simVars['mouse'].angleYY %= 360;
@@ -226,31 +254,34 @@ function goD(){
     var x = simVars['mouse'].tx;
     var z = simVars['mouse'].tz;
 
-    //
-    var x1 = x  + 0.028 * Math.cos( radians(angleY) );
-    var z1 = z  - 0.028 * Math.sin( radians(angleY) );
+    var x1 = x + 0.042 * Math.cos( radians(angleY) );
+    var z1 = z - 0.042 * Math.sin( radians(angleY) );
     x1 += 0.014 * Math.sin( radians(angleY) );
     z1 -= 0.014 * Math.cos( radians(angleY) );
 
     //
-    var x2 = x + 0.028 * Math.cos( radians(angleY) );
-    var z2 = z - 0.028 * Math.sin( radians(angleY) );
+    var x2 = x + 0.042 * Math.cos( radians(angleY) );
+    var z2 = z - 0.042 * Math.sin( radians(angleY) );
     x2 -= 0.014 * Math.sin( radians(angleY) );
     z2 += 0.014 * Math.cos( radians(angleY) );
 
     //
-    var x3 = x - 0.035 * Math.cos( radians(angleY) );
-    var z3 = z + 0.035 * Math.sin( radians(angleY) );
-    x3 -= 0.021 * Math.sin( radians(angleY) );
-    z3 += 0.021 * Math.cos( radians(angleY) );
+    var x3 = x + 0.042 * Math.cos( radians(angleY) );
+    var z3 = z - 0.042 * Math.sin( radians(angleY) );
 
     //
-    var x4 = x - 0.035 * Math.cos( radians(angleY) );
-    var z4 = z + 0.035 * Math.sin( radians(angleY) );
-    x4 += 0.021 * Math.sin( radians(angleY) );
-    z4 -= 0.021 * Math.cos( radians(angleY) );
+    var x4 = x - 0.042 * Math.cos( radians(angleY) );
+    var z4 = z + 0.042 * Math.sin( radians(angleY) );
+    x4 -= 0.021 * Math.sin( radians(angleY) );
+    z4 += 0.021 * Math.cos( radians(angleY) );
 
-    if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)&&!detectCollision(x4,z4)){
+    //
+    var x5 = x - 0.042 * Math.cos( radians(angleY) );
+    var z5 = z + 0.042 * Math.sin( radians(angleY) );
+    x5 += 0.021 * Math.sin( radians(angleY) );
+    z5 -= 0.021 * Math.cos( radians(angleY) );
+
+    if(!detectCollision(x1,z1)&&!detectCollision(x2,z2)&&!detectCollision(x3,z3)&&!detectCollision(x4,z4)&&!detectCollision(x5,z5)){
         simVars['mouse'].angleYY -= 2.0;
         if(Math.abs(simVars['mouse'].angleYY) > 360)
             simVars['mouse'].angleYY %= 360;
