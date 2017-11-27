@@ -47,6 +47,8 @@ var worker;
 // Dictionary with models and variables
 var simVars = null;
 
+var mapLoaded = false;
+
 var walls = null;
 var visited = null;
 
@@ -103,14 +105,20 @@ function countFrames() {
    }
 }
 
+
+//----------------------------------------------------------------------------
+//
+// Count solve time
+//
+
 var elT = 0;
-var lastT = new Date().getTime();
+var lastT = 0;
 var keepScore = 0;
 var stopTimer = true;
 
 function countTime() {
     if(won()) {
-        document.getElementById("timer").innerHTML =  (Math.round((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
+        document.getElementById("timer").innerHTML =  (Math.floor((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
         score();
         stopTimer = true;
         return;
@@ -124,7 +132,22 @@ function countTime() {
 
     lastT = now;
 
-    document.getElementById("timer").innerHTML = (Math.round((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
+    document.getElementById("timer").innerHTML = (Math.floor((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
+}
+
+function resetTimer(){
+
+    elT = 0;
+    keepScore++;
+    keepScore%=10;
+    stopTimer = true;
+
+    document.getElementById("timer").innerHTML = "0:0.000";
+}
+
+function startTimer(){
+    lastT = new Date().getTime()
+    stopTimer = false;
 }
 
 function score() {
@@ -260,7 +283,7 @@ function initBuffers(model) {
 }
 
 //----------------------------------------------------------------------------
-
+var first = true;
 //  Drawing the model
 function drawModel( angleXX, angleYY, angleZZ,
 					tx, ty, tz,
@@ -303,7 +326,7 @@ function drawModel( angleXX, angleYY, angleZZ,
     }
     else{
         // dont change mouse ilumination with its rotation
-        normalMatrix = mat3(1,1,1);
+        normalMatrix = flatten(mat3(1));
     }
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 
@@ -401,7 +424,8 @@ function drawScene() {
 	countFrames();
 
     //timer
-    countTime();
+    if(!stopTimer)
+        countTime();
 }
 
 //----------------------------------------------------------------------------
@@ -754,8 +778,11 @@ var currentlyPressedKeys = {};
 
 function handleKeys() {
 
+    if(!mapLoaded) return;
+
     // W or w
     if ((currentlyPressedKeys[87] || currentlyPressedKeys[119])){
+        if(stopTimer) startTimer();
 
         if ( controlMode  == 0 ) {
             constGoW();
@@ -771,6 +798,7 @@ function handleKeys() {
     }
     // A or a
     if (currentlyPressedKeys[65] || currentlyPressedKeys[97]){
+        if(stopTimer) startTimer();
 
         if ( controlMode == 0 ) {
             constGoA();
@@ -784,6 +812,7 @@ function handleKeys() {
     }
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
+        if(stopTimer) startTimer();
 
     	if ( controlMode == 0 ) {
             constGoS();
@@ -800,6 +829,7 @@ function handleKeys() {
     }
     // D or d
     if (currentlyPressedKeys[68] || currentlyPressedKeys[100]){
+        if(stopTimer) startTimer();
 
         if ( controlMode == 0 ) {
             constGoD();
@@ -1009,13 +1039,8 @@ function setEventListeners( canvas ){
     });
 
     document.getElementById("reset-button").onclick = function(){
-        //HERE
-        elT = 0;
-        lastT = new Date().getTime();
-        keepScore++;
-        keepScore%=10;
-        stopTimer = false;
-
+        //Timer vars
+        resetTimer();
 
         resetAll();
     };
@@ -1188,6 +1213,8 @@ function loadMapDataA(file){
         }
         simVars['wall']['ver'][line/2] = tmpWalls;
     }
+
+    mapLoaded = true;
 }
 
 function loadMapDataB(file){
@@ -1265,6 +1292,8 @@ function loadMapDataB(file){
 
         simVars['wall']['ver'][line] = tmpWalls;
     }
+
+    mapLoaded = true;
 }
 
 //----------------------------------------------------------------------------
