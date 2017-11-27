@@ -72,7 +72,7 @@ var row = null;
 
 // marks where the mouse has been (doesn't works in free control)
 // Used to draw markers
-var marked = null;
+var marked = [];
 
 var controlMode = 0;
 //----------------------------------------------------------------------------
@@ -142,7 +142,7 @@ function resetTimer(){
     keepScore%=10;
     stopTimer = true;
 
-    document.getElementById("timer").innerHTML = "0:0.000";
+    document.getElementById("timer").innerHTML = "00:00";
 }
 
 function startTimer(){
@@ -246,7 +246,7 @@ function initTexture() {
 	postSideTexture.image.src  = simVars['post'].textureSide;
 	mouseTopTexture.image.src  = simVars['mouse'].textureTop;
 	mouseSideTexture.image.src = simVars['mouse'].textureSide;
-	markerTexture.image.src = simVars['marker1'].texture;
+	markerTexture.image.src = simVars['marker'].texture;
 }
 
 // Handling the Vertex and the Color Buffers
@@ -415,7 +415,8 @@ function drawScene() {
     drawEmptyMap(mvMatrix);
     drawWalls(mvMatrix);
 
-    //drawMarkers(mvMatrix);
+    if(document.getElementById("flag").checked)
+        drawMarkers(mvMatrix);
 
     if(!firstPersonView)
         drawMouse(mvMatrix);
@@ -503,15 +504,19 @@ function drawWalls(mvMatrix){
 
 function drawMarkers(mvMatrix){
     // Drawing the mouse
-    initBuffers(simVars['marker3']);
+    initBuffers(simVars['marker']);
 
-    // Instantianting the current model
-    drawModel( null, null, null,
-               0, 0, 0,
-               mvMatrix,
-               true,
-               false,
-               markerTexture);
+    var x = wallOffset + halfWallLateral;
+    var z =  wallOffset + halfWallLateral;
+    for(var m = 0; m < marked.length; m++){
+        // Instantianting the current model
+        drawModel( null, null, null,
+                   x + lateral/16*(marked[m]['col']), 0, z +  lateral/16*marked[m]['row'],
+                   mvMatrix,
+                   true,
+                   false,
+                   markerTexture);
+    }
 }
 
 function drawMouse(mvMatrix){
@@ -588,7 +593,7 @@ function animate(){
             // First Person View Camera Angle
             fPVAngle = -(simVars['mouse'].angleYY-90);
         }
-        else if(animationType == 2){ // Move foward
+        else if(animationType == 2){ // Move forward
 
             if(newAnimation){
                 animationAux = lateral/16;
@@ -695,7 +700,7 @@ function mouseRotate90(positive){
     }
 }
 
-function mouseMoveFoward(){
+function mouseMoveForward(){
     if(!animationInProg){
         var angleY = simVars['mouse'].angleYY;
         var x = simVars['mouse'].tx + (2/16) * Math.cos( radians(angleY) );
@@ -782,6 +787,7 @@ function handleKeys() {
 
     // W or w
     if ((currentlyPressedKeys[87] || currentlyPressedKeys[119])){
+
         if(stopTimer) startTimer();
 
         if ( controlMode  == 0 ) {
@@ -796,8 +802,10 @@ function handleKeys() {
             }
         }
     }
+
     // A or a
     if (currentlyPressedKeys[65] || currentlyPressedKeys[97]){
+
         if(stopTimer) startTimer();
 
         if ( controlMode == 0 ) {
@@ -810,8 +818,10 @@ function handleKeys() {
                 fPVAngle = -(simVars['mouse'].angleYY-90);
         }
     }
+
     // S or s
     if (currentlyPressedKeys[83] || currentlyPressedKeys[115]){
+
         if(stopTimer) startTimer();
 
     	if ( controlMode == 0 ) {
@@ -825,10 +835,11 @@ function handleKeys() {
                 globalTz = - simVars['mouse'].tz;
             }
         }
-
     }
+
     // D or d
     if (currentlyPressedKeys[68] || currentlyPressedKeys[100]){
+
         if(stopTimer) startTimer();
 
         if ( controlMode == 0 ) {
@@ -1049,8 +1060,11 @@ function setEventListeners( canvas ){
     //https://stackoverflow.com/questions/10343913/how-to-create-a-web-worker-from-a-string
     document.getElementById("run-button").onclick = function(){
 
-        if(controlMode == 2){
+        if(mapLoaded && controlMode == 2){
             resetAll();
+
+            resetTimer();
+            if(stopTimer) startTimer();
 
             var script = document.getElementById("sample5").value;
 
@@ -1063,7 +1077,7 @@ function setEventListeners( canvas ){
 
                 var dataObj = `(
                     function workerFunction() {
-                        function foward(){
+                        function forward(){
                             self.postMessage("f");
                         }
                         function back(){
@@ -1078,8 +1092,8 @@ function setEventListeners( canvas ){
                         var self = this;
                         var maze = null;
                         self.onmessage = function(e) {
-                            var currentWalls = e.data;
-                            if(currentWalls instanceof Array){
+                            var pathIsClear = e.data;
+                            if(pathIsClear instanceof Array){
                                 `+ script +`
                             }
                             self.postMessage("c");
@@ -1095,7 +1109,7 @@ function setEventListeners( canvas ){
                 worker.onmessage = function(e) {
                     var val = e.data; // message received from worker
                     if(val == 'f')
-                        mouseMoveFoward();
+                        mouseMoveForward();
                     if(val == 'b')
                         mouseMoveBackwards();
                     if(val == 'r')
@@ -1116,11 +1130,19 @@ function resetAll(){
     resetMap();
     resetAnimation();
 
+    //reset Worker
+    if(typeof(worker) != "undefined") {
+        worker.terminate();
+        worker = undefined;
+    }
+
+    marked = [];
     if(firstPersonView){ // reset camera
         resetGlobalVars();
         globalTx = - simVars['mouse'].tx;
-        globalTy = -0.03;
-        globalTz = -0.25 - simVars['mouse'].tz;
+        globalTy = - 0.03;
+        globalTz = - simVars['mouse'].tz;
+        fPVAngle = -(simVars['mouse'].angleYY-90);
     }
 }
 

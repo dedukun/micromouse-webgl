@@ -501,6 +501,34 @@ function getSimulationVars(){
             textureTop: "Textures/mouse.png",
             textureSide: "Textures/green.png"
         },
+        marker: {
+            vertices:
+            [
+                 0.007,  0.001,  0.007,
+                 0.007,  0.001, -0.007,
+                -0.007,  0.001, -0.007,
+                -0.007,  0.001,  0.007
+            ],
+            normals:
+            [
+                 0.0,  1.0,  0.0,
+                 0.0,  1.0,  0.0,
+                 0.0,  1.0,  0.0,
+                 0.0,  1.0,  0.0
+            ],
+            faces:
+            [
+                 0,  1,  2,   0,  2,  3,
+            ],
+            textureCoords:
+            [
+                0.0, 1.0,
+                0.0, 0.0,
+                1.0, 0.0,
+                1.0, 1.0
+            ],
+            texture: "Textures/red.png",
+        },
         marker1: {
             vertices:
             [
@@ -526,8 +554,7 @@ function getSimulationVars(){
                 0.0, 0.0,
                 1.0, 0.0,
                 1.0, 1.0
-            ],
-            texture: "Textures/red.png",
+            ]
         },
         marker2: {
             vertices:

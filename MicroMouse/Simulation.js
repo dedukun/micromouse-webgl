@@ -87,7 +87,7 @@ function checkWalls(){
 }
 
 function constGoW(){
-    mouseMoveFoward();
+    mouseMoveForward();
 }
 function constGoS(){
     mouseMoveBackwards();
@@ -264,5 +264,13 @@ function won(){
     if(row==8&&col==7) return true;
     if(row==7&&col==8) return true;
     if(row==8&&col==8) return true;
+
+    for(var i = 0; i < marked.length; i++){
+        if(marked[i]['row'] == row && marked[i]['col'] == col)
+            return false;
+    }
+
+    marked.push({'row':row,'col':col});
+
     return false;
 }
