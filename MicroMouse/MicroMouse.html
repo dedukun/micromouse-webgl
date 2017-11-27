@@ -244,6 +244,14 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 					<div class="mdl-tooltip" for="lightingLabel">
 						Turn lighting ON/OFF
 					</div>
+					<label id="bread" class="mdl-icon-toggle mdl-js-icon-toggle mdl-js-ripple-effect" for="flag">
+						<input type="checkbox" id="flag" class="mdl-icon-toggle__input">
+							<i class="mdl-icon-toggle__label material-icons">flag</i>
+					</label>
+					<div class="mdl-tooltip" for="bread">
+						Turn on bread crumbs to know where you've been!
+					</div>
+					
 				</div>
 				<!--###########################################################################-->
 				<div class="mdl-cell--1-col">
@@ -306,15 +314,16 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 							<br>
 							Available functions:
 							<br>
-							foward()<br>
+							forward()<br>
 							back()<br>
-							rotateRight()<br>
-							rotateLeft()<br>
-							Available data:
-							walls[0]<br>
-							walls[1]<br>
-							walls[2]<br>
-							walls[3]<br>
+							right()<br>
+							left()<br>
+							Available var:<br>
+							var maze -- you can use this var to store any data
+							Available data:<br>
+							pathIsClear[0] -- boolean - true means no left wall<br>
+							pathIsClear[1] -- boolean - true means no front wall<br>
+							pathIsClear[2] -- boolean - true means no right wall<br>
 						</div>
 						<form action="#" style="margin-right: -16px">
 							<div class="mdl-textfield mdl-js-textfield mdl-cell--12-col" style="margin-top: -16px" >
