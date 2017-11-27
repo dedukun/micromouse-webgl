@@ -1024,7 +1024,8 @@ function setEventListeners( canvas ){
         }
 
         controlMode = 0;
-        resetMap();
+        resetTimer();
+        resetAll();
     });
 
 
