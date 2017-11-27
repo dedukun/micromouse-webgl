@@ -151,7 +151,7 @@ function startTimer(){
 }
 
 function score() {
-    document.getElementById("score"+keepScore).innerHTML = (Math.round((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
+    document.getElementById("score"+keepScore).innerHTML = (Math.floor((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
 }
 
 
