@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////{
 //																//
 //  Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017	//
 //																//
@@ -37,6 +37,9 @@ var fPVAngle = 0.0;
 
 // Block User User Inputs (Rotations)
 var blockUserInput = false;
+
+// Worker for AI
+var worker;
 
 //------------------------------------
 // MicroMouse variables
@@ -584,6 +587,7 @@ function animate(){
 }
 
 function resetAnimation(){
+
     animationAux = 0;
     animationType = -1;
     lastAnimateTime = 0;
@@ -593,21 +597,39 @@ function resetAnimation(){
 }
 
 function mouseRotate90(positive){
-    animationInProg = true;
-    if(positive)
-        animationType = 0;
-    else
-        animationType = 1;
+    if(!animationInProg){
+        animationInProg = true;
+        if(positive)
+            animationType = 0;
+        else
+            animationType = 1;
+    }
 }
 
 function mouseMoveFoward(){
-    animationInProg = true;
-    animationType = 2;
+    if(!animationInProg){
+        var angleY = simVars['mouse'].angleYY;
+        var x = simVars['mouse'].tx + (2/16) * Math.cos( radians(angleY) );
+        var z = simVars['mouse'].tz - (2/16) * Math.sin( radians(angleY) );
+
+        if( wayIsClear(x, z) ) {
+            animationInProg = true;
+            animationType = 2;
+        }
+    }
 }
 
 function mouseMoveBackwards(){
-    animationInProg = true;
-    animationType = 3;
+    if(!animationInProg){
+        var angleY = simVars['mouse'].angleYY;
+        var x = simVars['mouse'].tx - (2/16) * Math.cos( radians(angleY) );
+        var z = simVars['mouse'].tz + (2/16) * Math.sin( radians(angleY) );
+
+        if( wayIsClear(x, z) ) {
+            animationInProg = true;
+            animationType = 3;
+        }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -620,10 +642,11 @@ function tick() {
     resizeCanvas(gl.canvas);
     gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
 
-    if(!animationInProg)
-        handleKeys();
+    if(controlMode != 2) // not AI
+        if(!animationInProg)
+            handleKeys();
 
-    if(controlMode == 0)
+    if(controlMode != 1) // not free control
         animate();
 
     drawScene();
@@ -878,30 +901,122 @@ function setEventListeners( canvas ){
 
     var control1 = document.getElementById("option-1");
     var control2 = document.getElementById("option-2");
+    var control3 = document.getElementById("option-3");
 
     control1.addEventListener("click", function(){
+        document.getElementById("run-button").disabled = true;
+        document.getElementById("sample5").disabled = true;
+
+        worker.terminate();
+        worker = undefined;
+
         controlMode = 0;
         resetMap();
     });
 
 
     control2.addEventListener("click", function(){
+        document.getElementById("run-button").disabled = true;
+        document.getElementById("sample5").disabled = true;
+
+        worker.terminate();
+        worker = undefined;
+
         controlMode = 1;
         animationInProg = false;
     });
 
+    control3.addEventListener("click", function(){
+        document.getElementById("run-button").disabled = false;
+        document.getElementById("sample5").disabled = false;
+
+        controlMode = 2;
+        resetAll();
+    });
+
     document.getElementById("reset-button").onclick = function(){
+        resetAll();
+    };
 
-        resetMap();
-        resetAnimation();
 
-        if(firstPersonView){ // reset camera
-            resetGlobalVars();
-            globalTx = - simVars['mouse'].tx;
-            globalTy = -0.03;
-            globalTz = -0.25 - simVars['mouse'].tz;
+    //https://stackoverflow.com/questions/10343913/how-to-create-a-web-worker-from-a-string
+    document.getElementById("run-button").onclick = function(){
+
+        if(controlMode == 2){
+            resetAll();
+
+            var script = document.getElementById("sample5").value;
+
+            if(typeof(Worker) !== "undefined") {
+
+                if(typeof(worker) != "undefined") {
+                    worker.terminate();
+                    worker = undefined;
+                }
+
+                var dataObj = `(
+                    function workerFunction() {
+                        function foward(){
+                            self.postMessage("f");
+                        }
+                        function back(){
+                            self.postMessage("b");
+                        }
+                        function left(){
+                            self.postMessage("l");
+                        }
+                        function right(){
+                            self.postMessage("r");
+                        }
+                        var self = this;
+                        var maze = null;
+                        self.onmessage = function(e) {
+                            var currentWalls = e.data;
+                            if(currentWalls instanceof Array){
+                                `+ script +`
+                            }
+                            self.postMessage("c");
+                        }
+                    })();`; // here is the trick to convert the above fucntion to string
+                var blob = new Blob([dataObj.replace('"use strict";', '')]); // firefox adds "use strict"; to any function which might block worker execution so knock it off
+                var blobURL = (window.URL ? URL : webkitURL).createObjectURL(blob, {
+                    type: 'application/javascript; charset=utf-8'
+                });
+
+                worker = new Worker(blobURL);
+
+                worker.onmessage = function(e) {
+                    var val = e.data; // message received from worker
+                    if(val == 'f')
+                        mouseMoveFoward();
+                    if(val == 'b')
+                        mouseMoveBackwards();
+                    if(val == 'r')
+                        mouseRotate90(true);
+                    if(val == 'l')
+                        mouseRotate90(false);
+                    var walls = checkWalls();
+                    worker.postMessage(walls); // Send data to worker
+                };
+                worker.postMessage(checkWalls()); // Send data to our worker.
+
+            } else {
+                alert("Sorry, your browser does not support Web Workers...");
+            }
         }
     };
+}
+
+function resetAll(){
+    resetMap();
+    resetAnimation();
+
+    if(firstPersonView){ // reset camera
+        resetGlobalVars();
+        globalTx = - simVars['mouse'].tx;
+        globalTy = -0.03;
+        globalTz = -0.25 - simVars['mouse'].tz;
+    }
 }
 
 // reset Camera/global values;

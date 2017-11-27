@@ -64,23 +64,33 @@ function wayIsClear(x, z){
     return check;
 }
 
-function constGoW(){
-    var angleY = simVars['mouse'].angleYY;
-    var x = simVars['mouse'].tx + (2/16) * Math.cos( radians(angleY) );
-    var z = simVars['mouse'].tz - (2/16) * Math.sin( radians(angleY) );
 
-    if( wayIsClear(x, z) ) {
-        mouseMoveFoward();
+// Returns if there is a wall at the left, front or right side of the mouse
+function checkWalls(){
+    var walls = [];
+    if(!animationInProg){
+        var angleY = simVars['mouse'].angleYY;
+        var tX = simVars['mouse'].tx;
+        var tZ = simVars['mouse'].tz;
+
+        // check left wall
+        walls[0] = wayIsClear(tX + (2/16) * Math.cos( radians(angleY + 90) ),
+                              tZ - (2/16) * Math.sin( radians(angleY + 90) ));
+        // check front wall
+        walls[1] = wayIsClear(tX + (2/16) * Math.cos( radians(angleY) ),
+                              tZ - (2/16) * Math.sin( radians(angleY) ));
+        // check right wall
+        walls[2] = wayIsClear(tX + (2/16) * Math.cos( radians(angleY - 90) ),
+                              tZ - (2/16) * Math.sin( radians(angleY - 90) ));
     }
+    return walls;
+}
+
+function constGoW(){
+    mouseMoveFoward();
 }
 function constGoS(){
-    var angleY = simVars['mouse'].angleYY;
-    var x = simVars['mouse'].tx - (2/16) * Math.cos( radians(angleY) );
-    var z = simVars['mouse'].tz + (2/16) * Math.sin( radians(angleY) );
-
-    if( wayIsClear(x, z) ) {
-        mouseMoveBackwards();
-    }
+    mouseMoveBackwards();
 }
 function constGoA(){
     mouseRotate90(false);
