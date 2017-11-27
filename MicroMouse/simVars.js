@@ -527,7 +527,7 @@ function getSimulationVars(){
                 1.0, 0.0,
                 1.0, 1.0
             ],
-            texture: "Textures/red.png",
+            texture: "Textures/bread.png",
         },
         marker1: {
             vertices:
