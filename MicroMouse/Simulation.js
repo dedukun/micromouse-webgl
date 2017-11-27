@@ -256,3 +256,13 @@ function goD(){
             simVars['mouse'].angleYY %= 360;
     }
 }
+
+function won(){
+    var row = Math.floor((simVars['mouse'].tz+1)/(2/16));
+    var col = Math.floor((simVars['mouse'].tx+1)/(2/16));
+    if(row==7&&col==7) return true;
+    if(row==8&&col==7) return true;
+    if(row==7&&col==8) return true;
+    if(row==8&&col==8) return true;
+    return false;
+}

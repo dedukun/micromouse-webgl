@@ -95,8 +95,36 @@ function countFrames() {
 
        elapsedTime -= 1000;
 
-	   document.getElementById('fps').innerHTML = 'fps:' + fps;
+       document.getElementById('canvasEdge').setAttribute('data-badge', fps);
    }
+}
+
+var elT = 0;
+var lastT = new Date().getTime();
+var keepScore = 0;
+var stopTimer = true;
+
+function countTime() {
+    if(won()) {
+        document.getElementById("timer").innerHTML =  (Math.round((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
+        score();
+        stopTimer = true;
+        return;
+    }
+
+    if(stopTimer) return;
+
+    var now = new Date().getTime();
+
+    elT += (now - lastT);
+
+    lastT = now;
+
+    document.getElementById("timer").innerHTML = (Math.round((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
+}
+
+function score() {
+    document.getElementById("score"+keepScore).innerHTML = (Math.round((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
 }
 
 
@@ -357,6 +385,9 @@ function drawScene() {
 
 	// Counting the frames
 	countFrames();
+
+    //timer
+    countTime();
 }
 
 //----------------------------------------------------------------------------
@@ -843,6 +874,10 @@ function setEventListeners( canvas ){
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
 
+    document.getElementById("slider").onchange = function(){
+        animationSpeed = document.getElementById("slider").value;
+    }
+
     document.getElementById("file").onchange = function(){
 
         // http://stackoverflow.com/questions/23331546/how-to-use-javascript-to-read-local-text-file-and-read-line-by-line
@@ -907,8 +942,10 @@ function setEventListeners( canvas ){
         document.getElementById("run-button").disabled = true;
         document.getElementById("sample5").disabled = true;
 
-        worker.terminate();
-        worker = undefined;
+        if(worker) {
+            worker.terminate();
+            worker = undefined;
+        }
 
         controlMode = 0;
         resetMap();
@@ -919,8 +956,10 @@ function setEventListeners( canvas ){
         document.getElementById("run-button").disabled = true;
         document.getElementById("sample5").disabled = true;
 
-        worker.terminate();
-        worker = undefined;
+        if(worker) {
+            worker.terminate();
+            worker = undefined;
+        }
 
         controlMode = 1;
         animationInProg = false;
@@ -935,6 +974,14 @@ function setEventListeners( canvas ){
     });
 
     document.getElementById("reset-button").onclick = function(){
+        //HERE
+        elT = 0;
+        lastT = new Date().getTime();
+        keepScore++;
+        keepScore%=10;
+        stopTimer = false;
+
+
         resetAll();
     };
 

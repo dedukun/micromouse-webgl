@@ -185,78 +185,13 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 	        </div>
 	    </header>
 		<div class="mdl-grid mdl-cell--12-col mdl-shadow--4dp">
+			<div class="mdl-layout-spacer"></div>
 			<div class="mdl-grid mdl-cell--4-col">
 				<!--###########################################################################-->
 				<div class="mdl-cell--1-col">
 				</div>
 				<!--###########################################################################-->
-				<div class="mdl-cell--11-col portfolio-card">
-	  				<div class="mdl-card__title">
-	    				<h2 class="mdl-card__title-text">
-	      					<strong>Movement</strong>
-	    				</h2>
-	  				</div>
-	  				<div class="mdl-card__supporting-text  mdl-shadow--4dp">
-						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
-	  						<input type="radio" id="option-2" class="mdl-radio__button" name="options" value="1">
-	  						<span class="mdl-radio__label">Free</span>
-						</label>
-						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
-	  						<input type="radio" id="option-1" class="mdl-radio__button" name="options" value="0" checked>
-	  						<span class="mdl-radio__label">Constrained</span>
-						</label>
-						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-3">
-	  						<input type="radio" id="option-3" class="mdl-radio__button" name="options" value="2">
-	  						<span class="mdl-radio__label">Script</span>
-						</label>
-						<form action="#">
-							<div class="mdl-textfield mdl-js-textfield mdl-cell--12-col">
-								<textarea class="mdl-textfield__input" type="text" rows= "6" id="sample5" ></textarea>
-								<label class="mdl-textfield__label" for="sample5"><i class="material-icons">code</i></label>
-							</div>
-						</form>
-						<button id="run-button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-					 		<i class="material-icons">directions_run</i>
-						</button>
-	  				</div>
-				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--1-col">
-				</div>
-			</div>
-			<!--######################## canvas #########################-->
-			<div class="mdl-grid mdl-cell--5-col">
-				<div class="mdl-shadow--4dp">
-					<canvas id="my-canvas" style="width: auto; height: 75vh" width="350" height="350"></canvas>
-				</div>
-				<div class="mdl-cell--1-col">
-					<p id="fps"></p>
-				</div>
-			</div>
-			<div class="mdl-grid mdl-cell--2-col">
-				<!--################################ cards ###############################-->
-				<div class="mdl-cell--7-col portfolio-card">
-	  				<div class="mdl-card__supporting-text">
-						<button id="reset-button" class="mdl-button mdl-js-button mdl-button--fab mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-						 	<i class="material-icons">autorenew</i>
-						</button>
-						<input type="file" id="file">
-						<label for="file" class="mdl-button mdl-js-button mdl-button--fab mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-							<i class="material-icons">file_upload</i>
-						</label>
-	  				</div>
-				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--7-col portfolio-card">
-	  				<div class="mdl-card__supporting-text  mdl-shadow--4dp">
-						<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="lighting">
-							<span class="mdl-switch__label">Lighting</span>
-  							<input type="checkbox" id="lighting" class="mdl-switch__input" checked>
-						</label>
-	  				</div>
-				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--7-col portfolio-card">
+				<div class="portfolio-card">
 	  				<div class="mdl-card__title ">
 	    				<h2 class="mdl-card__title-text">
 	      					<strong>Camera</strong>
@@ -267,10 +202,12 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 		  					<input type="radio" id="camera-0" class="mdl-radio__button" name="camera" value="0" checked>
 		  					<span class="mdl-radio__label">Free</span>
 						</label>
+						<br>
 						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="camera-1">
 		  					<input type="radio" id="camera-1" class="mdl-radio__button" name="camera" value="1">
 		  					<span class="mdl-radio__label">Top View</span>
 						</label>
+						<br>
 						<label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="camera-2">
 		  					<input type="radio" id="camera-2" class="mdl-radio__button" name="camera" value="2">
 		  					<span class="mdl-radio__label">First Person</span>
@@ -278,37 +215,216 @@ Tiago Madeira 76321 & Diogo Duarte 77645 - November 2017
 	  				</div>
 				</div>
 				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
+				<div class="mdl-cell--1-col">
 				</div>
 				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
+				<div class="portfolio-card">
+					<div class="mdl-card__title ">
+	    				<h2 class="mdl-card__title-text">
+	      					<strong><br></strong>
+	    				</h2>
+	  				</div>
+					<input type="file" id="file">
+					<label id="file-button" for="file" class="mdl-button mdl-js-button mdl-button--icon">
+						<i class="material-icons">file_upload</i>
+					</label>
+					<div class="mdl-tooltip" for="file-button">
+						Upload map file <br> Will replace current map
+					</div>
+					<button id="reset-button" class="mdl-button mdl-js-button mdl-button--icon">
+					 	<i class="material-icons">autorenew</i>
+					</button>
+					<div class="mdl-tooltip" for="reset-button">
+						Reset mouse
+					</div>
+					<label id="lightingLabel" class="mdl-icon-toggle mdl-js-icon-toggle mdl-js-ripple-effect" for="lighting">
+						<input type="checkbox" id="lighting" class="mdl-icon-toggle__input" checked>
+							<i class="mdl-icon-toggle__label material-icons">highlight</i>
+					</label>
+					<div class="mdl-tooltip" for="lightingLabel">
+						Turn lighting ON/OFF
+					</div>
 				</div>
 				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
+				<div class="mdl-cell--1-col">
 				</div>
 				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
+				<div class="portfolio-card">
+					<div class="mdl-card__title ">
+	    				<h2 class="mdl-card__title-text">
+	      					<strong><br></strong>
+	    				</h2>
+	  				</div>
+					<span class="mdl-chip mdl-chip--contact">
+					    <span class="mdl-chip__contact mdl-color--light-blue mdl-color-text--white"><img class="mdl-chip__contact" src="images/timer.png"></img></span>
+					    <span id="timer" class="mdl-chip__text">00:00</span>
+					</span>
 				</div>
 				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
+				<div class="mdl-cell--11-col portfolio-card">
+	  				<div class="mdl-card__title">
+	    				<h2 class="mdl-card__title-text">
+	      					<strong>Movement</strong>
+	    				</h2>
+	  				</div>
+	  				<div class="mdl-card__supporting-text  mdl-shadow--4dp">
+						<div align="right" style="margin-top: -8px; margin-bottom: -23px; margin-right: -8px;">
+							<i id="bulb" class="material-icons ">lightbulb_outline</i>
+						</div>
+						<div class="mdl-tooltip" for="bulb">
+							Hover options and slider to know more!
+						</div>
+						<label id="free" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
+	  						<input type="radio" id="option-2" class="mdl-radio__button" name="options" value="1">
+	  						<span class="mdl-radio__label">Free</span>
+	  						<div class="mdl-tooltip" for="free">
+								Move through any allowed space<br>
+								Rotate to any angle
+							</div>
+						</label>
+						<br>
+						<label id="const" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
+	  						<input type="radio" id="option-1" class="mdl-radio__button" name="options" value="0" checked>
+	  						<span class="mdl-radio__label">Constrained</span>	
+						</label>
+						<div class="mdl-tooltip" for="const">
+							Move block to block <br>
+							Rotate 90°<br>
+							Change animation speed in slider
+						</div>
+						<!-- Slider with Starting Value -->
+						<input id="slider" class="mdl-slider mdl-js-slider" type="range" min="1" max="10" value="3" tabindex="0">
+						<div class="mdl-tooltip" for="slider">
+							Adjust the speed of the animation
+						</div>
+						<label id="script" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-3">
+	  						<input type="radio" id="option-3" class="mdl-radio__button" name="options" value="2">
+	  						<span class="mdl-radio__label">Script</span>
+						</label>
+						<div class="mdl-tooltip" for="script">
+							Use code to navigate and discover the map!
+							<br>
+							Available functions:
+							<br>
+							foward()<br>
+							back()<br>
+							rotateRight()<br>
+							rotateLeft()<br>
+							Available data:
+							walls[0]<br>
+							walls[1]<br>
+							walls[2]<br>
+							walls[3]<br>
+						</div>
+						<form action="#" style="margin-right: -16px">
+							<div class="mdl-textfield mdl-js-textfield mdl-cell--12-col" style="margin-top: -16px" >
+								<textarea class="mdl-textfield__input" type="text" rows= "10" id="sample5" style="margin-right: -16px" disabled></textarea>
+								<label class="mdl-textfield__label" for="sample5">
+									<i class="material-icons">code</i>
+								</label>
+							</div>
+						</form>
+						<br>
+						<div align="right" style="margin-top: -32px; margin-bottom: -8px;">
+							<button id="run-button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" disabled>
+						 		<i class="material-icons">directions_run</i>
+							</button>
+							<div class="mdl-tooltip" for="run-button">
+								Run your code
+							</div>
+						</div>
+	  				</div>
 				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
-				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
-				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
-				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
-				</div>
-				<!--###########################################################################-->
-				<div class="mdl-cell--12-col">
+
+			</div>
+			<!--######################## canvas #########################-->
+			<div class="mdl-grid mdl-cell--5-col">
+				<div id="canvasEdge" class="mdl-shadow--4dp mdl-badge mdl-badge--overlap" data-badge="1">
+					<canvas id="my-canvas" style="width: auto; height: 75vh" width="350" height="350"></canvas>
 				</div>
 			</div>
-			<!--###########################################################################-->
+			<ul class="demo-list-icon mdl-list">
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score0">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score1">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score2">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score3">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score4">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score5">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score6">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score7">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score8">
+							00:00
+						</div>
+					</span>
+				</li>
+				<li class="mdl-list__item">
+					<span class="mdl-list__item-primary-content">
+						<i class="material-icons mdl-list__item-icon">timelapse</i>
+						<div id="score9">
+							00:00
+						</div>
+					</span>
+				</li>
+			</ul>
 			<div class="mdl-layout-spacer"></div>
 		</div>
 	    <footer class="mdl-mega-footer">
