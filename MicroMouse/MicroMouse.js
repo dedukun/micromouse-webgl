@@ -625,6 +625,13 @@ function resetAnimation(){
     newAnimation = true;
     animationXAxis = true;
     animationInProg = false;
+
+    if(controlMode == 2){
+        if(worker){
+            var walls = checkWalls();
+            worker.postMessage(walls); // Send data to worker
+        }
+    }
 }
 
 function mouseRotate90(positive){
@@ -1042,8 +1049,6 @@ function setEventListeners( canvas ){
                         mouseRotate90(true);
                     if(val == 'l')
                         mouseRotate90(false);
-                    var walls = checkWalls();
-                    worker.postMessage(walls); // Send data to worker
                 };
                 worker.postMessage(checkWalls()); // Send data to our worker.
 
