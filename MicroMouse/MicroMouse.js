@@ -115,12 +115,14 @@ var elT = 0;
 var lastT = 0;
 var keepScore = 0;
 var stopTimer = true;
+var alreadyWon = false;
 
 function countTime() {
-    if(won()) {
+    if(won()&&!alreadyWon) {
         document.getElementById("timer").innerHTML =  (Math.floor((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
         score();
         stopTimer = true;
+        alreadyWon = true;
         return;
     }
 
@@ -138,20 +140,22 @@ function countTime() {
 function resetTimer(){
 
     elT = 0;
-    keepScore++;
-    keepScore%=10;
     stopTimer = true;
+    alreadyWon = false;
 
     document.getElementById("timer").innerHTML = "00:00";
 }
 
 function startTimer(){
     lastT = new Date().getTime()
-    stopTimer = false;
+    if(!alreadyWon)
+        stopTimer = false;
 }
 
 function score() {
     document.getElementById("score"+keepScore).innerHTML = (Math.floor((elT/1000)/60)) + ":" + ((elT/1000)%60).toFixed(3);
+    keepScore++;
+    keepScore%=10;
 }
 
 
