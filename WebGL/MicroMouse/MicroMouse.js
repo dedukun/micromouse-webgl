@@ -40,6 +40,7 @@ var blockUserInput = false;
 
 // Worker for AI
 var worker;
+var scriptMaze = null;
 
 //------------------------------------
 // MicroMouse variables
@@ -1083,25 +1084,25 @@ function setEventListeners( canvas ){
                 var dataObj = `(
                     function workerFunction() {
                         function forward(){
-                            self.postMessage("f");
+                            self.postMessage({ move: "f", maze: maze });
                         }
                         function back(){
-                            self.postMessage("b");
+                            self.postMessage({ move: "b", maze: maze });
                         }
                         function left(){
-                            self.postMessage("l");
+                            self.postMessage({ move: "l", maze: maze });
                         }
                         function right(){
-                            self.postMessage("r");
+                            self.postMessage({ move: "r", maze: maze });
                         }
                         var self = this;
-                        var maze = null;
+                        var maze = `+ JSON.stringify(scriptMaze) +`;
                         self.onmessage = function(e) {
                             var pathIsClear = e.data;
                             if(pathIsClear instanceof Array){
                                 `+ script +`
                             }
-                            self.postMessage("c");
+                            self.postMessage({ move: "c", maze: maze });
                         }
                     })();`; // here is the trick to convert the above fucntion to string
                 var blob = new Blob([dataObj.replace('"use strict";', '')]); // firefox adds "use strict"; to any function which might block worker execution so knock it off
@@ -1112,7 +1113,8 @@ function setEventListeners( canvas ){
                 worker = new Worker(blobURL);
 
                 worker.onmessage = function(e) {
-                    var val = e.data; // message received from worker
+                    var val = e.data.move; // message received from worker
+                    scriptMaze = e.data.maze;
                     if(val == 'f')
                         mouseMoveForward();
                     if(val == 'b')
