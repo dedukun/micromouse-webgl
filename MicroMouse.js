@@ -913,20 +913,24 @@ function handleMouseMove(event) {
 //https://www.sitepoint.com/html5-javascript-mouse-wheel/
 function handleMouseWheel(event){
 
-    // cross-browser wheel delta
-	var event = window.event || event; // old IE support
-	var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+    // Check if Shift is pressed
+    if (currentlyPressedKeys[16] == true) {
 
-    //Zoom out
-    if (delta < 0 && !blockUserInput) {
-        globalSx *= 0.9;
-        globalSz = globalSy = globalSx;
-    }
+        // cross-browser wheel delta
+        var event = window.event || event; // old IE support
+        var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
 
-    //Zoom in
-    if (delta > 0 && !blockUserInput) {
-        globalSx *= 1.1;
-        globalSz = globalSy = globalSx;
+        //Zoom out
+        if (delta < 0 && !blockUserInput) {
+            globalSx *= 0.9;
+            globalSz = globalSy = globalSx;
+        }
+
+        //Zoom in
+        if (delta > 0 && !blockUserInput) {
+            globalSx *= 1.1;
+            globalSz = globalSy = globalSx;
+        }
     }
 }
 
